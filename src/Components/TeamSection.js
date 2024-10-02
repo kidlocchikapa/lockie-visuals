@@ -1,6 +1,6 @@
 import React from 'react';
 import KidImage from './lockie.png';
-import Kumwenda from './Yusuf.png';
+import Yusuf from "./yusuf.jpg";
 import SydneyImage from './Sydney.png';
 
 const PhoneIcon = () => (
@@ -66,7 +66,7 @@ const TeamSection = () => {
     {
       name: "Yusuf Mussa",
       roles: ["Developer", "Researcher"],
-      image: Kumwenda,
+      image: Yusuf,
       phone: "+1234567891",
       facebook: "https://facebook.com/yusuf",
       instagram: "https://instagram.com/yusuf",
