@@ -1,23 +1,30 @@
 import React, { useState } from 'react';
-import { IoCodeSlash, IoBrush, IoDesktop, IoMegaphone } from 'react-icons/io5';
+import { FaPencilRuler, FaPalette, FaCode, FaBullhorn } from 'react-icons/fa';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import atsogo from './atsogo.jpg'
 import diza from './diza.jpg'
+import {Link} from 'react-router-dom';
+import philemon from './philemonBonanza2.jpg'
+import rocky from './Rocky.jpg'
 import myShoe from './mySHOE.jpg'
-import Online from './Online.jpg'
+import tri from './tri.jpg'
+import week from './Week.jpg'
+import final from './final.jpg'
 
 const ServiceCard = ({ icon, title, description }) => (
-  <div className="bg-gray-200 p-6 rounded-lg text-center flex flex-col items-center shadow-md">
+  <div 
+    className="bg-gray-200 p-6 rounded-lg text-center flex flex-col items-center font-poppins shadow-md hover:translate-y-[-10px] transition duration-300 ease-in-out"
+  >
     {icon}
     <h3 className="text-blue-800 font-semibold mt-4 mb-2">{title}</h3>
-    <p className="text-gray-600 text-sm mb-4">{description}</p>
-    <button className="text-blue-800 font-semibold">See More</button>
+    <p className="text-black text-sm mb-4">{description}</p>
+    <Link to = '/see-more' ><button className="text-blue-800 font-semibold">See More</button> </Link>
   </div>
 );
 
 const RecentProjects = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = 2; // Update this number based on how many slides you have
+  const totalSlides = 2; 
 
   const nextSlide = () => {
     setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides);
@@ -28,7 +35,7 @@ const RecentProjects = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative font-poppins">
       <h2 className="text-3xl font-bold text-center text-orange-500 mb-8">Recent Projects</h2>
       <div className="overflow-hidden">
         <div 
@@ -40,15 +47,15 @@ const RecentProjects = () => {
               <img src={atsogo} alt="Shoe" className="w-[1080] h-[1080] object-cover " />
               <img src={diza} alt="Bus" className="w-[1080] h-[1080] object-cover" />
               <img src={myShoe} alt="Hairstyle" className="w-[1080] h-[1080] object-cover" />
-              <img src={diza} alt="Bus" className="w-[1080] h-[1080] object-cover" />
+              <img src={rocky} alt="Bus" className="w-[1080] h-[1080] object-cover" />
             </div>
           </div>
           <div className="w-full flex-shrink-0">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <img src="/path/to/another-shoe-image.jpg" alt="Another Shoe" className="w-full h-40 object-cover rounded-lg" />
-              <img src="/path/to/another-bus-image.jpg" alt="Another Bus" className="w-full h-40 object-cover rounded-lg" />
-              <img src="/path/to/another-hairstyle-image.jpg" alt="Another Hairstyle" className="w-full h-40 object-cover rounded-lg" />
-              <img src="/path/to/another-plans-image.jpg" alt="Another Plans" className="w-full h-40 object-cover rounded-lg" />
+              <img src={philemon} alt="Another Shoe"  className="w-[1080] h-[1080] object-cover " />
+              <img src={tri} alt="Another Bus" className="w-[1080] h-[1080] object-cover" />
+              <img src={final} alt="Another Hairstyle" className="w-[1080] h-[1080]  object-cover" />
+              <img src={week} alt="Another Plans" className="w-[1080] h-[1080] object-cover" />
             </div>
           </div>
           {/* Add more slides here as needed */}
@@ -58,13 +65,13 @@ const RecentProjects = () => {
         onClick={prevSlide}
         className="absolute top-1/2 -left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg"
       >
-        <IoIosArrowBack className="text-2xl text-gray-800" />
+        <IoIosArrowBack className="text-2xl text-black" />
       </button>
       <button
         onClick={nextSlide}
         className="absolute top-1/2 -right-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg"
       >
-        <IoIosArrowForward className="text-2xl text-gray-800 " />
+        <IoIosArrowForward className="text-2xl text-black " />
       </button>
     </div>
   );
@@ -73,31 +80,31 @@ const RecentProjects = () => {
 const OurServices = () => {
   const services = [
     {
-      icon: <IoCodeSlash className="text-5xl text-black" />,
+      icon: <FaCode className="text-5xl font-poppins text-black" />,
       title: "Website Development",
-      description: "hvsxchvshshshdh-fjfjfjhfgcfdtsdwf-dufdjiyguefeygwuetu wcgjfeguegfiu"
+      description: "We tailor each website to reflect your brand’s unique identity and meet your specific business needs."
     },
     {
-      icon: <IoBrush className="text-5xl text-black" />,
+      icon: <FaPalette className="text-5xl font-poppins text-black" />,
       title: "Graphic Designing",
-      description: "hvsxchvshshshdh-fjfjfjhfgcfdtsdwf-dufdjiyguefeygwuetu wcgjfeguegfiu"
+      description: "Our designs are crafted with precision and creativity, ensuring a professional look that stands out."
     },
     {
-      icon: <IoDesktop className="text-5xl text-black" />,
+      icon: < FaPencilRuler className="text-5xl font-poppins text-black" />,
       title: "Website Designing",
-      description: "hvsxchvshshshdh-fjfjfjhfgcfdtsdwf-dufdjiyguefeygwuetu wcgjfeguegfiu"
+      description: "We focus on creating intuitive and engaging user experiences that keep visitors coming back."
     },
     {
-      icon: <IoMegaphone className="text-5xl text-black" />,
+      icon: <FaBullhorn className="text-5xl font-poppins text-black" />,
       title: "Marketing",
-      description: "hvsxchvshshshdh-fjfjfjhfgcfdtsdwf-dufdjiyguefeygwuetu wcgjfeguegfiu"
+      description: "We tailor our marketing efforts to target your specific audience, ensuring that your message reaches the right people at the right time."
     },
   ];
 
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="container mx-auto font-poppins px-4 py-16">
       <h2 className="text-3xl font-bold text-center text-orange-500 mb-2">Our Services</h2>
-      <p className="text-center text-gray-700 mb-8 max-w-2xl mx-auto">
+      <p className="text-center text-black mb-8 max-w-2xl mx-auto">
         At lockie visuals we provide a range of services made to make your online presence exceptional
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">

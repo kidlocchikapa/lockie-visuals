@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import LogoImage from './LogoImage.png';
-import { Menu, X, ChevronDown } from 'lucide-react';
-import {Link} from 'react-dom'
+import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 function Head() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,14 +18,16 @@ function Head() {
   ];
 
   return (
-    <nav className="bg-white text-black relative px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white font-medium text-black relative px-4 sm:px-6  sm:bg-transparent font-poppins lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 w-40">
-            <img src={LogoImage} alt="LockieVisuals" />
+            <Link to="/">
+              <img src={LogoImage} alt="LockieVisuals" />
+            </Link>
           </div>
           <div className="hidden md:block">
-            <ul className="flex space-x-4 text-sm font-medium">
+            <ul className="flex space-x-4 text-sm font-poppins font-medium">
               <li className="relative">
                 <button
                   onClick={toggleDropdown}
@@ -37,27 +39,36 @@ function Head() {
                   <ul className="absolute z-10 left-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg">
                     {solutions.map((solution, index) => (
                       <li key={index}>
-                        <a href ="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        <Link
+                          to={`/${solution.toLowerCase().replace(/\s/g, '-')}`}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                         >
                           {solution}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
                 )}
               </li>
-              <li className="px-4 py-2">About Us</li>
-              <li className="px-4 py-2">Contact</li>
-              <li>
-                <button className="px-4 py-2 ring-blue-900 bg-gray-100 ring-1 hover:bg-gray-200 rounded-md">
-                  Sign Up
-                </button>
+              <li className="px-4 py-2">
+                <Link to="/about">About Us</Link>
+              </li>
+              <li className="px-4 py-2">
+                <Link to="/contact">Contact</Link>
               </li>
               <li>
-                <button className="px-4 py-2 text-white bg-blue-800 rounded-md hover:bg-blue-700">
-                  Login
-                </button>
+                <Link to="/signup">
+                  <button className="px-4 py-2 ring-blue-900 bg-gray-100 ring-1 hover:bg-gray-200 rounded-md">
+                    Sign Up
+                  </button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/login">
+                  <button className="px-4 py-2 text-white bg-blue-800 rounded-md hover:bg-blue-700">
+                    Login
+                  </button>
+                </Link>
               </li>
             </ul>
           </div>
@@ -78,47 +89,49 @@ function Head() {
             <li className="relative">
               <button
                 onClick={toggleDropdown}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left flex items-center justify-between"
               >
                 Solutions
+                <ChevronRight className="h-4 w-4" />
               </button>
               {isDropdownOpen && (
                 <ul className="pl-4">
                   {solutions.map((solution, index) => (
                     <li key={index}>
-                      <a href ="#"
-                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                      <Link
+                        to={`/${solution.toLowerCase().replace(/\s/g, '-')}`}
+                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
                       >
                         {solution}
-                        </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               )}
             </li>
             <li>
-              <a href ="#"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-              >
+              <Link to="/about" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                 About Us
-                </a>
+              </Link>
             </li>
             <li>
-              <a href ="#"
-                className="block px-3 py-2  rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-              >
+              <Link to="/contact" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                 Contact
-              </a>
+              </Link>
             </li>
             <li>
-              <button className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                Sign Up
-              </button>
+              <Link to="/signup" className="block w-full text-left">
+                <button className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                  Sign Up
+                </button>
+              </Link>
             </li>
             <li>
-              <button className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-800 hover:bg-blue-700">
-                Login
-              </button>
+              <Link to="/login" className="block w-full text-left">
+                <button className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-800 hover:bg-blue-700">
+                  Login
+                </button>
+              </Link>
             </li>
           </ul>
         </div>

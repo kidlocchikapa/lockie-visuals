@@ -28,13 +28,13 @@ const HomePage = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % carouselData.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 5000); 
 
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="relative min-h-screen text-white overflow-hidden">
+    <div className="relative min-h-screen text-white overflow-hidden font-poppins">
       {carouselData.map((slide, index) => (
         <div
           key={index}
@@ -50,19 +50,19 @@ const HomePage = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-900  opacity-80"></div>
         </div>
       ))}
-      <div className="relative z-10 container mx-auto px-4 py-16 h-screen flex flex-col justify-center">
+      <div className="relative z-10 container mx-auto px-4 py-16 h-screen flex flex-col font-poppins justify-center">
         <div className="text max-w-2xl">
-          <h1 className="text-4xl font-sans md:text-6xl font-bold mb-4 transition-all duration-500">
+          <h1 className="text-4xl md:text-6xl font-poppins font-bold mb-4 transition-all duration-500">
             {carouselData[currentSlide].title}
           </h1>
-          <p className="text-xl md:text-2xl mb-8 font-sans font-semibold transition-all duration-500">
+          <p className="text-xl md:text-2xl mb-8 font-poppins font-semibold transition-all duration-500">
             {carouselData[currentSlide].subtitle}
           </p>
           <div className="flex space-x-4">
-            <Link to="/demo" className="bg-orange-500 hover:bg-orange-600 shadow-md text-white text-md font-bold py-2 px-6 rounded-md  transition duration-300">
+            <Link to="/demo" className="bg-orange-500 hover:bg-orange-600  text-white text-md font-bold py-2 px-6 rounded-md  transition duration-300">
               See Demo
             </Link>
-            <Link to="/contact" className="bg-transparent shadow-md hover:bg-white hover:text-orange-500 text-white font-bold py-2 px-6 rounded-md text-md border-2 border-white transition duration-300">
+            <Link to="/contact" className="bg-transparent  hover:bg-white hover:text-orange-500 text-white font-bold py-2 px-6 rounded-md text-md border-2 border-white transition duration-300">
               Contact Sales
             </Link>
           </div>
