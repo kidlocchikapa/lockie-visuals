@@ -72,7 +72,7 @@ function Head() {
               </li>
             </ul>
           </div>
-          <div className="md:hidden">
+          <div className="md:block">
             <button onClick={toggleMenu}>
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
