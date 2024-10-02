@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import LogoImage from './LogoImage.png';
+import React, { useState, useEffect } from 'react';
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
 
 function Head() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [compressedLogo, setCompressedLogo] = useState(null);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
@@ -17,13 +18,35 @@ function Head() {
     'Marketing'
   ];
 
+  useEffect(() => {
+    const compressLogo = async () => {
+      try {
+        const response = await fetch('/LogoImage.png');
+        const blob = await response.blob();
+        const options = {
+          maxSizeMB: 0.1, // Compress to 100KB
+          maxWidthOrHeight: 200,
+          useWebWorker: true
+        };
+        const compressedFile = await imageCompression(blob, options);
+        setCompressedLogo(URL.createObjectURL(compressedFile));
+      } catch (error) {
+        console.error('Error compressing logo:', error);
+        // Fallback to original logo if compression fails
+        setCompressedLogo('/LogoImage.png');
+      }
+    };
+
+    compressLogo();
+  }, []);
+
   return (
-    <nav className="bg-white font-medium text-black relative px-4 sm:px-6  sm:bg-transparent font-poppins lg:px-8">
+    <nav className="bg-white font-medium text-black relative px-4 sm:px-6 sm:bg-transparent font-poppins lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 w-40">
             <Link to="/">
-              <img src={LogoImage} alt="LockieVisuals" />
+              {compressedLogo && <img src={compressedLogo} alt="LockieVisuals" />}
             </Link>
           </div>
           <div className="hidden md:block">
