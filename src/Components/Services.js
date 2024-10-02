@@ -6,7 +6,7 @@ import diza from './diza.jpg'
 import {Link} from 'react-router-dom';
 import philemon from './philemonBonanza2.jpg'
 import rocky from './Rocky.jpg'
-import myShoe from './mySHOE.jpg'
+import MyShoe from './mySHOE.jpg'
 import tri from './tri.jpg'
 import week from './Week.jpg'
 import final from './final.jpg'
@@ -46,7 +46,7 @@ const RecentProjects = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <img src={atsogo} alt="Shoe" className="w-[1080] h-[1080] object-cover " />
               <img src={diza} alt="Bus" className="w-[1080] h-[1080] object-cover" />
-              <img src={myShoe} alt="Hairstyle" className="w-[1080] h-[1080] object-cover" />
+              <img src={MyShoe} alt="Hairstyle" className="w-[1080] h-[1080] object-cover" />
               <img src={rocky} alt="Bus" className="w-[1080] h-[1080] object-cover" />
             </div>
           </div>
