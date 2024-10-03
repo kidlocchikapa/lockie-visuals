@@ -1,6 +1,6 @@
 import React from 'react';
 import KidImage from './lockie.png';
-import Yusuf from "./yusuf.png";
+import Yusuf from "./Yusuf.png";
 import SydneyImage from './Sydney.png';
 
 const PhoneIcon = () => (
