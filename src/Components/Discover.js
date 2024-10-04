@@ -11,7 +11,7 @@ const DiscoveryItem = ({ title, description, icon, reverse }) => (
     </div>
     <div className="w-full md:w-2/3 font-poppins md:px-8">
       <div className="md:flex md:justify-start sm:flex sm:justify-center mb-4">
-        <h2 className="text-2xl md:text-3xl font-bold text-indigo-900">{title}</h2>
+        <h2 className="text-2xl md:text-3xl text-center font-bold text-indigo-900">{title}</h2>
       </div>
       <p className="text-black mb-6">{description}</p>
       <div className="md:flex md:justify-start sm:flex sm:justify-center">

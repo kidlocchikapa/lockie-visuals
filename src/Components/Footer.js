@@ -7,7 +7,7 @@ import DanImage from './DanielKumwenda.jpg';
 import KidImage from './team1.jpg';
 
 const ProfileImage = ({ src, alt }) => (
-  <img src={src} alt={alt} className="w-36 h-36 object-cover rounded-sm" />
+  <img src={src} alt={alt} className="w-36 h-36 object-cover rounded-sm mx-auto md:mx-0" />
 );
 
 const testimonials = [
@@ -47,10 +47,14 @@ const TestimonialSlider = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-     <Link to="/Testmonials" > <h2 className="text-3xl font-extrabold text-orange-500 mb-4">Testimonials</h2></Link>
-      <div className="flex flex-col md:flex-row items-start">
-        <ProfileImage src={testimonials[currentTestimonial].image} alt={testimonials[currentTestimonial].name} />
-        <div className="md:ml-4 mt-4 md:mt-0">
+      <Link to="/Testmonials">
+        <h2 className="text-3xl font-extrabold text-center text-orange-500 mb-4">Testimonials</h2>
+      </Link>
+      <div className="flex flex-col md:flex-row items-center md:items-start">
+        <div className="w-full md:w-auto mb-4 md:mb-0">
+          <ProfileImage src={testimonials[currentTestimonial].image} alt={testimonials[currentTestimonial].name} />
+        </div>
+        <div className="md:ml-4 text-center md:text-left">
           <h3 className="text-2xl font-bold text-blue-900 mb-2">{testimonials[currentTestimonial].heading}</h3>
           <p className="mb-4">{testimonials[currentTestimonial].text}</p>
           <p className="text-orange-500 font-bold">{testimonials[currentTestimonial].name}</p>
@@ -123,7 +127,7 @@ const Footer = () => {
           </div>
           <div className="mt-8">
             <div className="flex flex-col sm:flex-row">
-              <input type="text" placeholder="Send us your views" className="flex-grow p-2  sm:rounded-r-none text-black mb-2 sm:mb-0" />
+              <input type="text" placeholder="Send us your views" className="flex-grow p-2 sm:rounded-r-none text-black mb-2 sm:mb-0" />
               <button className="bg-orange-500 text-white px-4 py-2 sm:rounded-r-lg sm:rounded-l-none hover:bg-orange-600 transition-colors duration-300">Submit</button>
             </div>
           </div>
