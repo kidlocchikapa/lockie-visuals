@@ -4,7 +4,7 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 
 const Navbar = () => {
   return (
-    <header className='padding-x py-8 absolute z-10 w-full'>
+    <header className='padding-x py-8 absolute z-10 w-full font-poppins'>
         <nav className='flex justify-between items-center max-container'>
             <ul>
                 < a href="/">
@@ -14,7 +14,7 @@ const Navbar = () => {
                     height={29}
                     />
                 </a>
-                <ul className='flex-1 flex justify-center items-center gap-16 max-lg:hidden'>
+                <ul className='flex-1 flex justify-center items-center gap-  max-lg:hidden'>
 
                 </ul>
             </ul>
