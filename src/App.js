@@ -9,6 +9,7 @@ import Footer from './Components/Footer';
 import Maintainance from './Maintainance';
 import Login from './Login';
 import Signup from './signup';
+import Dashboard from './Dash';
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
                <TeamSection/>
                <Footer/></>} />
           <Route path="/services" element={<OurServices/>} />
+          <Route path="/dashboard" element={<Footer/>} />
           <Route path="/about" element={<Maintainance/>} />
           <Route path="/signup" element={<Signup/>} />
           <Route path="/login" element={<Login/>} />

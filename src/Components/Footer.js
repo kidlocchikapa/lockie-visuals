@@ -1,63 +1,92 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide-react';
-import LogoImage from './LogoImage.png';
-import Phil from './mon.jpg';
-import DanImage from './DanielKumwenda.jpg';
-import KidImage from './team1.jpg';
 
-const ProfileImage = ({ src, alt }) => (
-  <img src={src} alt={alt} className="w-36 h-36 object-cover rounded-sm mx-auto md:mx-0" />
-);
-
-const testimonials = [
+// Sample testimonials data
+const sampleTestimonials = [
   {
-    name: "Kidloc Chikapa",
-    company: "GardenHoldings.com",
-    heading: "Outstanding Website Design and Development",
-    text: "Lockie Visuals created a stunning website for our business that perfectly captures our brand. The process was smooth and the results exceeded our expectations.",
-    image: KidImage
+    id: 1,
+    image: "/api/placeholder/150/150",
+    name: "John Doe",
+    heading: "Exceptional Photography",
+    text: "Working with Lockie Visuals was an absolute pleasure. Their attention to detail and creativity exceeded our expectations.",
+    company: "Creative Studios"
   },
   {
-    name: "Daniel Kumwenda",
-    company: "Student",
-    heading: "Incredibly talented team!",
-    text: "The team at Lockie Visuals is incredibly talented. They delivered a top-notch design that has received rave reviews from my audience. I couldn't be happier!",
-    image: DanImage
+    id: 2,
+    image: "/api/placeholder/150/150",
+    name: "Sarah Smith",
+    heading: "Professional Service",
+    text: "The team at Lockie Visuals delivered outstanding results for our corporate event. Their professionalism and quality of work was impressive.",
+    company: "Tech Innovations Ltd"
   },
   {
-    name: "Philemon Mwanganya",
-    company: "Student",
-    heading: "Exceptional Service and Design",
-    text: "Lockie Visuals exceeded my expectations with their outstanding creativity and professionalism. The design they delivered has been a huge hit with my audience, and I am absolutely thrilled with the results!",
-    image: Phil
-  },
+    id: 3,
+    image: "/api/placeholder/150/150",
+    name: "Mike Johnson",
+    heading: "Amazing Event Coverage",
+    text: "They captured every special moment of our wedding perfectly. The photos and videos are absolutely beautiful!",
+    company: "Happy Client"
+  }
 ];
 
-const TestimonialSlider = () => {
+const ProfileImage = ({ src, alt }) => (
+  <img 
+    src={src} 
+    alt={alt} 
+    className="w-36 h-36 object-cover rounded-sm mx-auto md:mx-0" 
+  />
+);
+
+const CustomAlert = ({ type, message }) => (
+  <div 
+    className={`p-4 rounded-lg mt-2 ${
+      type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+    }`}
+  >
+    {message}
+  </div>
+);
+
+const TestimonialSlider = ({ testimonials = sampleTestimonials }) => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   useEffect(() => {
+    if (!testimonials || testimonials.length === 0) return;
+    
     const timer = setInterval(() => {
       setCurrentTestimonial((prevIndex) => (prevIndex + 1) % testimonials.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [testimonials]);
+
+  if (!testimonials || testimonials.length === 0) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link to="/Testmonials">
-        <h2 className="text-3xl font-extrabold text-center text-orange-500 mb-4">Testimonials</h2>
+      <Link to="/testimonials">
+        <h2 className="text-3xl font-extrabold text-center text-orange-500 mb-4">
+          Testimonials
+        </h2>
       </Link>
       <div className="flex flex-col md:flex-row items-center md:items-start">
         <div className="w-full md:w-auto mb-4 md:mb-0">
-          <ProfileImage src={testimonials[currentTestimonial].image} alt={testimonials[currentTestimonial].name} />
+          <ProfileImage 
+            src={testimonials[currentTestimonial].image} 
+            alt={testimonials[currentTestimonial].name} 
+          />
         </div>
         <div className="md:ml-4 text-center md:text-left">
-          <h3 className="text-2xl font-bold text-blue-900 mb-2">{testimonials[currentTestimonial].heading}</h3>
+          <h3 className="text-2xl font-bold text-blue-900 mb-2">
+            {testimonials[currentTestimonial].heading}
+          </h3>
           <p className="mb-4">{testimonials[currentTestimonial].text}</p>
-          <p className="text-orange-500 font-bold">{testimonials[currentTestimonial].name}</p>
+          <p className="text-orange-500 font-bold">
+            {testimonials[currentTestimonial].name}
+          </p>
           <p>{testimonials[currentTestimonial].company}</p>
         </div>
       </div>
@@ -65,9 +94,11 @@ const TestimonialSlider = () => {
         {testimonials.map((_, index) => (
           <span 
             key={index}
-            className={`h-2 w-2 rounded-full mx-1 cursor-pointer ${index === currentTestimonial ? 'bg-black' : 'bg-gray-300'}`}
+            className={`h-2 w-2 rounded-full mx-1 cursor-pointer ${
+              index === currentTestimonial ? 'bg-black' : 'bg-gray-300'
+            }`}
             onClick={() => setCurrentTestimonial(index)}
-          ></span>
+          />
         ))}
       </div>
     </div>
@@ -75,29 +106,136 @@ const TestimonialSlider = () => {
 };
 
 const SocialIcon = ({ Icon, href, ariaLabel }) => (
-  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={ariaLabel} className="text-white hover:text-orange-500 transition-colors duration-300">
+  <a 
+    href={href} 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    aria-label={ariaLabel} 
+    className="text-white hover:text-orange-500 transition-colors duration-300"
+  >
     <Icon size={24} />
   </a>
 );
 
-const Footer = () => {
+const FeedbackForm = () => {
+  const [feedback, setFeedback] = useState('');
+  const [status, setStatus] = useState({ type: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!feedback.trim()) {
+      setStatus({ type: 'error', message: 'Please enter your feedback' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('http://localhost:3000/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          content: feedback, 
+          timestamp: new Date().toISOString(),
+          source: 'website_footer'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit feedback');
+      }
+
+      setStatus({ type: 'success', message: 'Thank you for your feedback!' });
+      setFeedback('');
+    } catch (error) {
+      console.error('Feedback submission error:', error);
+      setStatus({ 
+        type: 'error', 
+        message: error.message || 'Failed to submit feedback. Please try again.' 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="mt-8">
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
+        <div className="flex flex-col sm:flex-row">
+          <input
+            type="text"
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="Send us your views"
+            className="flex-grow p-2 sm:rounded-r-none text-black mb-2 sm:mb-0"
+            disabled={isSubmitting}
+          />
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-orange-500 text-white px-4 py-2 sm:rounded-r-lg sm:rounded-l-none hover:bg-orange-600 transition-colors duration-300 disabled:opacity-50"
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit'}
+          </button>
+        </div>
+        {status.message && (
+          <CustomAlert type={status.type} message={status.message} />
+        )}
+      </form>
+    </div>
+  );
+};
+
+const Footer = ({ testimonials = sampleTestimonials }) => {
   return (
     <div className="flex flex-col min-h-screen font-poppins">
       <div className="bg-white text-black flex-grow font-medium py-8 md:py-16">
-        <TestimonialSlider />
+        <TestimonialSlider testimonials={testimonials} />
       </div>
       <footer className="bg-blue-900 text-white font-poppins py-8 md:py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <img src={LogoImage} alt="Lockie Visuals Logo" className="mb-4 h-10 w-auto filter invert" />
+              <img 
+                src="/logo.png" 
+                alt="Lockie Visuals Logo" 
+                className="mb-4 h-10 w-auto filter invert" 
+              />
               <div className="flex space-x-4 mt-4">
-                <SocialIcon Icon={Instagram} href="https://www.instagram.com/lockievisuals" ariaLabel="Instagram" />
-                <SocialIcon Icon={Facebook} href="https://www.facebook.com/lockievisuals" ariaLabel="Facebook" />
-                <SocialIcon Icon={MessageCircle} href="https://wa.me/265990155300" ariaLabel="WhatsApp" />
-                <SocialIcon Icon={Video} href="https://www.tiktok.com/@lockievisuals" ariaLabel="TikTok" />
-                <SocialIcon Icon={Twitter} href="https://x.com/lockievisuals" ariaLabel="X (Twitter)" />
-                <SocialIcon Icon={Mail} href="mailto:kidloc24chikapa@gmail.com" ariaLabel="Email" />
+                <SocialIcon 
+                  Icon={Instagram} 
+                  href="https://www.instagram.com/lockievisuals" 
+                  ariaLabel="Instagram" 
+                />
+                <SocialIcon 
+                  Icon={Facebook} 
+                  href="https://www.facebook.com/lockievisuals" 
+                  ariaLabel="Facebook" 
+                />
+                <SocialIcon 
+                  Icon={MessageCircle} 
+                  href="https://wa.me/265990155300" 
+                  ariaLabel="WhatsApp" 
+                />
+                <SocialIcon 
+                  Icon={Video} 
+                  href="https://www.tiktok.com/@lockievisuals" 
+                  ariaLabel="TikTok" 
+                />
+                <SocialIcon 
+                  Icon={Twitter} 
+                  href="https://x.com/lockievisuals" 
+                  ariaLabel="X (Twitter)" 
+                />
+                <SocialIcon 
+                  Icon={Mail} 
+                  href="mailto:kidloc24chikapa@gmail.com" 
+                  ariaLabel="Email" 
+                />
               </div>
             </div>
             <div>
@@ -125,12 +263,7 @@ const Footer = () => {
               <p>Email : Infoatlockievisuals@gmail.com</p>
             </div>
           </div>
-          <div className="mt-8">
-            <div className="flex flex-col sm:flex-row">
-              <input type="text" placeholder="Send us your views" className="flex-grow p-2 sm:rounded-r-none text-black mb-2 sm:mb-0" />
-              <button className="bg-orange-500 text-white px-4 py-2 sm:rounded-r-lg sm:rounded-l-none hover:bg-orange-600 transition-colors duration-300">Submit</button>
-            </div>
-          </div>
+          <FeedbackForm />
           <div className="mt-4 text-center">
             <p>&copy; {new Date().getFullYear()} Lockie Visuals. All Rights Reserved.</p>
           </div>
