@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import LogoImage from './LogoImage.png';
+import LogoImage from '../asserts/LogoImage.png';
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
