@@ -75,9 +75,7 @@ const PortfolioSection = () => {
                 setActiveTab(tab);
                 if (tab !== 'designing') setCurrentFilter(null);
               }}
-              className={`relative px-4 py-2 text-lg ${
-                activeTab === tab ? 'text-blue-600' : 'text-gray-600'
-              }`}
+              className={`relative px-4 py-2 text-lg ${activeTab === tab ? 'text-blue-600' : 'text-gray-600'}`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
               {activeTab === tab && (
@@ -93,10 +91,10 @@ const PortfolioSection = () => {
 
       {/* Action Buttons */}
       {activeTab === 'all' && (
-        <div className="flex justify-center gap-4 mb-12">
+        <div className="flex justify-center gap-4 mb-12 flex-wrap">
           <button
             onClick={() => setCurrentFilter('design')}
-            className="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-300 hover:border-blue-500 transition-colors"
+            className="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-300 hover:border-blue-500 transition-colors mb-4 sm:mb-0"
           >
             Recent design projects
             <ArrowRight className="w-4 h-4" />
@@ -125,7 +123,7 @@ const PortfolioSection = () => {
       ) : getFilteredImages().length > 0 ? (
         <motion.div
           layout
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
         >
           {getFilteredImages().map((img, index) => (
             <motion.div
