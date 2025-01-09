@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import yusuf from './Yusuf.png'
-import LogoImage from '../asserts/LogoImage.png'
-import kidloc from './lockie.png'
-import sydney from './Sydney.png'
+import yusuf from './Yusuf.png';
+import LogoImage from '../asserts/LogoImage.png';
+import kidloc from './lockie.png';
+import sydney from './Sydney.png';
 import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide-react';
 
-// Sample testimonials data
+// Custom Alert Component
+const Alert = ({ type, message }) => {
+  const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
+  const textColor = type === 'error' ? 'text-red-800' : 'text-green-800';
+  const borderColor = type === 'error' ? 'border-red-200' : 'border-green-200';
+
+  return message ? (
+    <div className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4`}>
+      {message}
+    </div>
+  ) : null;
+};
+
+// Rest of the code remains the same until the testimonials data
 const defaultTestimonials = [
   {
     id: 1,
@@ -35,6 +48,7 @@ const defaultTestimonials = [
   }
 ];
 
+// Component definitions for TestimonialCard, SocialIcon, and FooterSection remain the same
 const TestimonialCard = ({ testimonial, isActive }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -91,6 +105,8 @@ const FooterSection = ({ title, children }) => (
 const Footer = ({ testimonials = defaultTestimonials }) => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [feedback, setFeedback] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState({ type: '', message: '' });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -99,10 +115,46 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     return () => clearInterval(timer);
   }, [testimonials]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle feedback submission
-    setFeedback('');
+    
+    if (!feedback.trim()) {
+      setFeedbackStatus({
+        type: 'error',
+        message: 'Please enter your feedback before submitting'
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFeedbackStatus({ type: '', message: '' });
+
+    try {
+      const response = await fetch('http://localhost:3000/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: feedback }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback');
+      }
+
+      setFeedback('');
+      setFeedbackStatus({
+        type: 'success',
+        message: 'Thank you for your feedback!'
+      });
+    } catch (error) {
+      setFeedbackStatus({
+        type: 'error',
+        message: 'Failed to submit feedback. Please try again later.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -136,7 +188,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
       <footer className="bg-gradient-to-br from-blue-900 to-blue-800 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            <FooterSection >
+            <FooterSection>
               <motion.img
                 src={LogoImage}
                 alt="Lockie Visuals Logo"
@@ -148,7 +200,6 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                 <SocialIcon Icon={Facebook} href="https://facebook.com/lockievisuals" label="Facebook" />
                 <SocialIcon Icon={MessageCircle} href="https://wa.me/265990155300" label="WhatsApp" />
                 <SocialIcon Icon={Video} href="https://tiktok.com/@lockievisuals" label="TikTok" />
-                <SocialIcon Icon={Twitter} href="https://x.com/lockievisuals" label="X (Twitter)" />
                 <SocialIcon Icon={Mail} href="mailto:kidloc24chikapa@gmail.com" label="Email" />
               </div>
             </FooterSection>
@@ -202,6 +253,10 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
+            {feedbackStatus.message && (
+              <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
+            )}
+            
             <div className="flex flex-col sm:flex-row gap-4">
               <input
                 type="text"
@@ -209,13 +264,17 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder="Share your thoughts with us"
                 className="flex-grow p-3 rounded-lg text-black focus:ring-2 focus:ring-orange-500 outline-none"
+                disabled={isSubmitting}
               />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors duration-300"
+                className={`bg-orange-500 text-white px-8 py-3 rounded-lg transition-colors duration-300 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-600'
+                }`}
+                disabled={isSubmitting}
               >
-                Submit
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </motion.button>
             </div>
           </motion.form>

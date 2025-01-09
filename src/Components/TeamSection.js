@@ -99,7 +99,7 @@ const TeamSection = () => {
   ];
 
   return (
-    <section className="py-12 bg-gray-50">
+    <section className="py-12 bg-gray-10">
       <div className="container mx-auto px-6 lg:px-20">
         {/* Section Title with Gradient Underline */}
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-8">

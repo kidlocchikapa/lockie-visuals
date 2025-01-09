@@ -3,6 +3,7 @@ import { FaPencilRuler, FaPalette, FaCode, FaBullhorn } from 'react-icons/fa';
 import { Link } from "react-router-dom";
 import { motion } from 'framer-motion';
 
+
 const DiscoveryItem = ({ title, description, icon, reverse, index }) => (
   <motion.div
     initial={{ opacity: 0, y: 50 }}
@@ -88,7 +89,7 @@ const Discover = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-gray-50">
+    <div className="relative min-h-screen bg-gray-50 ">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(79,_70,_229,_0.1),_transparent_50%)]" />
       
