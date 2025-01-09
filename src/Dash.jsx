@@ -4,9 +4,9 @@ import {
   Trash2,
   Eye,
   Edit,
-  Star,
-  User,
-  MessageSquare,
+  
+
+  
 } from 'lucide-react';
 
 const Dashboard = () => {

@@ -3,13 +3,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './Components/HomePage';
 import Navbar from './Components/Head';
 import OurServices from './Components/Services';
-import Discover from './Components/Discover';
 import TeamSection from './Components/TeamSection';
 import Footer from './Components/Footer';
 import Maintainance from './Maintainance';
 import Login from './Login';
 import Signup from './signup';
-import Dashboard from './Dash';
+
 
 const App = () => {
   return (
@@ -20,7 +19,7 @@ const App = () => {
           <Route path="/" element={
             <> <HomePage/> 
                <OurServices/>  
-               <Discover/>
+               
                <TeamSection/>
                <Footer/></>} />
           <Route path="/services" element={<OurServices/>} />

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import {  Code, Palette } from 'lucide-react';
 import ServiceSection from '../servicessection';
-import { ArrowRight } from 'lucide-react';
+
+// Import images
 import atsogo from '../asserts/atsogo.jpg';
 import diza from '../asserts/diza.jpg';
 import philemon from '../asserts/philemonBonanza2.jpg';
@@ -26,130 +28,137 @@ import somase from '../asserts/SomaseP.jpg';
 import unt from '../asserts/Untitled-1.jpg';
 
 const PortfolioSection = () => {
-  const [activeTab, setActiveTab] = useState('all');
-  const [currentFilter, setCurrentFilter] = useState(null);
+  const [selectedTab, setSelectedTab] = useState(null);
+  const [hoveredImage, setHoveredImage] = useState(null);
 
   const designImages = [
-    atsogo, diza, philemon, rocky, MyShoe, tri, week, final,
-    maggie, rise, one, dk, flearning, fishan, focus, infinity,
-    joe, madalo, puli, online, somase, unt,
+    { src: atsogo, alt: 'Atsogo' },
+    { src: diza, alt: 'Diza' },
+    { src: philemon, alt: 'Philemon' },
+    { src: rocky, alt: 'Rocky' },
+    { src: MyShoe, alt: 'My Shoe' },
+    { src: tri, alt: 'Tri' },
+    { src: week, alt: 'Week' },
+    { src: final, alt: 'Final' },
+    { src: maggie, alt: 'Maggie' },
+    { src: rise, alt: 'Soul Rise' },
+    { src: one, alt: 'Design One' },
+    { src: dk, alt: 'DK Suppliers' },
+    { src: flearning, alt: 'F Learning' },
+    { src: fishan, alt: 'Fishan' },
+    { src: focus, alt: 'Focus' },
+    { src: infinity, alt: 'Infinity' },
+    { src: joe, alt: 'Joe' },
+    { src: madalo, alt: 'Madalo' },
+    { src: puli, alt: 'Puli' },
+    { src: online, alt: 'Online' },
+    { src: somase, alt: 'Somase' },
+    { src: unt, alt: 'Untitled' }
   ];
 
-  const shouldShowImages = () => currentFilter === 'design' || activeTab === 'designing';
-
-  const getFilteredImages = () => {
-    if (!shouldShowImages()) return [];
-    return designImages;
-  };
+  const tabs = [
+    { id: 'designing', label: 'Design', icon: Palette },
+    { id: 'development', label: 'Development', icon: Code }
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-16 font-poppins">
-      <section className="mb-16">
+    <div className="bg-gradient-to-b from-gray-50 to-white py-16">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Services Section */}
         <ServiceSection />
-      </section>
-      <div className="text-center mb-12">
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold text-gray-900 mb-4"
-        >
-          Our Portfolio
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-gray-600 text-lg"
-        >
-          Explore our diverse collection of successful projects
-        </motion.p>
-      </div>
 
-      {/* Navigation Tabs */}
-      <div className="relative mb-12">
-        <div className="flex justify-center space-x-8">
-          {['all', 'designing', 'development'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => {
-                setActiveTab(tab);
-                if (tab !== 'designing') setCurrentFilter(null);
-              }}
-              className={`relative px-4 py-2 text-lg ${activeTab === tab ? 'text-blue-600' : 'text-gray-600'}`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              {activeTab === tab && (
-                <motion.div
-                  layoutId="underline"
-                  className="absolute left-0 right-0 h-0.5 bg-blue-600 bottom-0"
-                />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      {activeTab === 'all' && (
-        <div className="flex justify-center gap-4 mb-12 flex-wrap">
-          <button
-            onClick={() => setCurrentFilter('design')}
-            className="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-300 hover:border-blue-500 transition-colors mb-4 sm:mb-0"
-          >
-            Recent design projects
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setCurrentFilter('development')}
-            className="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-300 hover:border-blue-500 transition-colors"
-          >
-            Recent development projects
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Portfolio Grid or Empty State */}
-      {currentFilter === 'development' ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-16"
-        >
-          <p className="text-gray-500 text-lg">
-            No recent projects available in this category yet.
+        {/* Portfolio Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold mb-4">Our Portfolio</h2>
+          <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-300 mb-2" />
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Explore our journey through innovative designs and creative solutions that have helped our clients succeed
           </p>
-        </motion.div>
-      ) : getFilteredImages().length > 0 ? (
-        <motion.div
-          layout
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+        </div>
+
+        {/* Navigation Tabs */}
+        <motion.nav
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex flex-col sm:flex-row justify-center gap-3 mb-8"
         >
-          {getFilteredImages().map((img, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative aspect-square overflow-hidden rounded-lg"
+          {tabs.map((tab) => (
+            <motion.button
+              key={tab.id}
+              onClick={() => setSelectedTab(selectedTab === tab.id ? null : tab.id)}
+              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl transition-all w-full sm:w-auto
+                ${selectedTab === tab.id 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                }
+              `}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <img
-                src={img}
-                alt={`Portfolio item ${index + 1}`}
-                className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-              />
-            </motion.div>
+              <tab.icon size={18} />
+              <span>{tab.label}</span>
+            </motion.button>
           ))}
-        </motion.div>
-      ) : activeTab !== 'all' ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-16"
-        >
-          <p className="text-gray-500 text-lg">No projects available.</p>
-        </motion.div>
-      ) : null}
+        </motion.nav>
+
+        {/* Portfolio Content */}
+        <AnimatePresence mode="wait">
+          {selectedTab && (
+            <motion.div 
+              layout 
+              className="min-h-[400px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {selectedTab === 'development' ? (
+                <motion.div
+                  className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl shadow-md"
+                >
+                  <Code size={48} className="text-gray-400 mb-3" />
+                  <p className="text-gray-500 text-lg">
+                    No recent development projects available yet.
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  layout
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                >
+                  {designImages.map((img, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className="group relative aspect-square rounded-2xl overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300"
+                      onHoverStart={() => setHoveredImage(index)}
+                      onHoverEnd={() => setHoveredImage(null)}
+                    >
+                      <img
+                        src={img.src}
+                        alt={img.alt}
+                        className="w-full h-full object-cover transition-transform duration-500
+                          group-hover:scale-110"
+                      />
+                      {hoveredImage === index && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent
+                            flex items-end p-6"
+                        >
+                          <p className="text-white font-medium">{img.alt}</p>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
