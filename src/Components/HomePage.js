@@ -86,7 +86,7 @@ const HomePage = () => {
 
   return (
     <motion.div 
-      className="relative min-h-screen text-white font-poppins overflow-hidden"
+      className="relative min-h-screen text-white font-space-grotesk overflow-hidden"
       onHoverStart={() => setIsAutoPlaying(false)}
       onHoverEnd={() => setIsAutoPlaying(true)}
     >

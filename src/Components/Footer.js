@@ -130,7 +130,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     setFeedbackStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('http://localhost:3000/feedback', {
+      const response = await fetch('sql8.freemysqlhosting.net', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

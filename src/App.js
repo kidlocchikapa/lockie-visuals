@@ -13,7 +13,7 @@ import Signup from './signup';
 const App = () => {
   return (
     <Router>
-      <div className='font-poppins'>
+      <div className='font-space-grotesk'>
         <Navbar />
         <Routes>
           <Route path="/" element={
