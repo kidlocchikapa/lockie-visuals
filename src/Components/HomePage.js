@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, MousePointer2 } from 'lucide-react';
-import online from '../asserts/Online.jpg'
-import market from '../asserts/Market.jpg'
-import HomeImage from '../asserts/HomeImage.jpg'
+import online from '../asserts/Online.jpg';
+import market from '../asserts/Market.jpg';
+import HomeImage from '../asserts/HomeImage.jpg';
+
 const carouselData = [
   {
     title: 'Welcome to Lockie Visuals',
@@ -34,6 +35,16 @@ const carouselData = [
     }
   }
 ];
+
+// Image preloader component
+const ImagePreloader = ({ src, onLoad }) => {
+  useEffect(() => {
+    const img = new Image();
+    img.src = src;
+    img.onload = onLoad;
+  }, [src, onLoad]);
+  return null;
+};
 
 const slideVariants = {
   enter: (direction) => ({
@@ -67,6 +78,8 @@ const NavigationButton = ({ direction, onClick }) => (
 const HomePage = () => {
   const [[page, direction], setPage] = useState([0, 0]);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const slideIndex = Math.abs(page % carouselData.length);
 
@@ -74,15 +87,43 @@ const HomePage = () => {
     setPage([page + newDirection, newDirection]);
   };
 
+  // Preload all images on component mount
+  useEffect(() => {
+    carouselData.forEach((slide, index) => {
+      const img = new Image();
+      img.src = slide.image;
+      img.onload = () => {
+        setLoadedImages(prev => new Set([...prev, index]));
+        if (index === 0) setIsInitialLoad(false);
+      };
+    });
+  }, []);
+
   useEffect(() => {
     if (!isAutoPlaying) return;
 
     const slideInterval = setInterval(() => {
-      paginate(1);
+      if (loadedImages.size === carouselData.length) {
+        paginate(1);
+      }
     }, 5000);
 
     return () => clearInterval(slideInterval);
-  }, [isAutoPlaying, page]);
+  }, [isAutoPlaying, page, loadedImages]);
+
+  // Loading state component
+  const LoadingState = () => (
+    <div className="absolute inset-0 flex items-center justify-center bg-black">
+      <div className="space-y-4 text-center">
+        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-white text-lg">Loading visuals...</p>
+      </div>
+    </div>
+  );
+
+  if (isInitialLoad) {
+    return <LoadingState />;
+  }
 
   return (
     <motion.div 
@@ -90,7 +131,6 @@ const HomePage = () => {
       onHoverStart={() => setIsAutoPlaying(false)}
       onHoverEnd={() => setIsAutoPlaying(true)}
     >
-      
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={page}
@@ -110,10 +150,11 @@ const HomePage = () => {
             style={{
               backgroundImage: `url(${carouselData[slideIndex].image})`,
               backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundPosition: 'center',
+              opacity: loadedImages.has(slideIndex) ? 1 : 0,
+              transition: 'opacity 0.3s ease-in-out'
             }}
           >
-            {/* Enhanced Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/50 to-black/80">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_black_100%)] opacity-60" />
             </div>
@@ -121,11 +162,17 @@ const HomePage = () => {
         </motion.div>
       </AnimatePresence>
 
+      {/* Preload next image */}
+      <ImagePreloader 
+        src={carouselData[(slideIndex + 1) % carouselData.length].image} 
+        onLoad={() => setLoadedImages(prev => new Set([...prev, (slideIndex + 1) % carouselData.length]))}
+      />
+
       {/* Navigation Controls */}
       <NavigationButton direction="left" onClick={() => paginate(-1)} />
       <NavigationButton direction="right" onClick={() => paginate(1)} />
 
-      {/* Rest of the code remains the same... */}
+      {/* Content Section */}
       <div className="relative z-10 container mx-auto px-6 h-screen flex items-center">
         <div className="max-w-4xl">
           <motion.div
