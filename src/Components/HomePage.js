@@ -1,42 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, MousePointer2 } from 'lucide-react';
 import online from '../asserts/Online.jpg';
 import market from '../asserts/Market.jpg';
 import HomeImage from '../asserts/HomeImage.jpg';
 
-const carouselData = [
-  {
-    title: 'Welcome to Lockie Visuals',
-    subtitle: 'Your alternate partner for your professional online presence',
-    image: online,
-    cta: {
-      primary: 'Explore Our Work',
-      secondary: 'Get Started'
-    }
-  },
-  {
-    title: 'Enhance Your Online Presence',
-    subtitle: 'Professional visuals for your digital success',
-    image: market,
-    cta: {
-      primary: 'View Portfolio',
-      secondary: 'Contact Us'
-    }
-  },
-  {
-    title: 'Cutting-Edge Visual Solutions',
-    subtitle: 'Bringing your vision to life',
-    image: HomeImage,
-    cta: {
-      primary: 'See Demo',
-      secondary: 'Learn More'
-    }
-  }
-];
 
-// Image preloader component
+// Image preloader component remains the same
 const ImagePreloader = ({ src, onLoad }) => {
   useEffect(() => {
     const img = new Image();
@@ -46,6 +17,40 @@ const ImagePreloader = ({ src, onLoad }) => {
   return null;
 };
 
+const carouselData = [
+  {
+    title: 'Welcome to Lockie Visuals',
+    subtitle: 'Your alternate partner for your professional online presence',
+    image: online,
+    cta: {
+      primary: 'Explore Our Work',
+      secondary: 'Get Started'
+    },
+    path: '/portfolio' // Add path for navigation
+  },
+  {
+    title: 'Enhance Your Online Presence',
+    subtitle: 'Professional visuals for your digital success',
+    image: market,
+    cta: {
+      primary: 'View Portfolio',
+      secondary: 'Contact Us'
+    },
+    path: '/portfolio' // Add path for navigation
+  },
+  {
+    title: 'Cutting-Edge Visual Solutions',
+    subtitle: 'Bringing your vision to life',
+    image: HomeImage,
+    cta: {
+      primary: 'See Demo',
+      secondary: 'Learn More'
+    },
+    path: '/portfolio' // Add path for navigation
+  }
+];
+
+// Slide variants remain the same
 const slideVariants = {
   enter: (direction) => ({
     x: direction > 0 ? 1000 : -1000,
@@ -76,6 +81,7 @@ const NavigationButton = ({ direction, onClick }) => (
 );
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const [[page, direction], setPage] = useState([0, 0]);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [loadedImages, setLoadedImages] = useState(new Set());
@@ -87,7 +93,12 @@ const HomePage = () => {
     setPage([page + newDirection, newDirection]);
   };
 
-  // Preload all images on component mount
+  // Replace scrollToPortfolio with navigateToPortfolio
+  const navigateToPortfolio = () => {
+    navigate(carouselData[slideIndex].path);
+  };
+
+  // Rest of the useEffect hooks remain the same
   useEffect(() => {
     carouselData.forEach((slide, index) => {
       const img = new Image();
@@ -111,7 +122,6 @@ const HomePage = () => {
     return () => clearInterval(slideInterval);
   }, [isAutoPlaying, page, loadedImages]);
 
-  // Loading state component
   const LoadingState = () => (
     <div className="absolute inset-0 flex items-center justify-center bg-black">
       <div className="space-y-4 text-center">
@@ -127,11 +137,12 @@ const HomePage = () => {
 
   return (
     <motion.div 
-      className="relative min-h-screen text-white font-space-grotesk overflow-hidden"
+      className="relative h-screen text-white font-space-grotesk overflow-hidden"
       onHoverStart={() => setIsAutoPlaying(false)}
       onHoverEnd={() => setIsAutoPlaying(true)}
     >
       <AnimatePresence initial={false} custom={direction}>
+        {/* Rest of the AnimatePresence content remains the same */}
         <motion.div
           key={page}
           custom={direction}
@@ -162,17 +173,14 @@ const HomePage = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Preload next image */}
       <ImagePreloader 
         src={carouselData[(slideIndex + 1) % carouselData.length].image} 
         onLoad={() => setLoadedImages(prev => new Set([...prev, (slideIndex + 1) % carouselData.length]))}
       />
 
-      {/* Navigation Controls */}
       <NavigationButton direction="left" onClick={() => paginate(-1)} />
       <NavigationButton direction="right" onClick={() => paginate(1)} />
 
-      {/* Content Section */}
       <div className="relative z-10 container mx-auto px-6 h-screen flex items-center">
         <div className="max-w-4xl">
           <motion.div
@@ -209,19 +217,18 @@ const HomePage = () => {
               transition={{ delay: 0.4 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Link to="/demo">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group relative px-8 py-4 w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 rounded-full font-semibold text-white overflow-hidden shadow-xl transition-all hover:shadow-orange-500/30"
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {carouselData[slideIndex].cta.primary}
-                    <MousePointer2 size={18} className="inline" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 translate-y-full group-hover:translate-y-0 transition-transform" />
-                </motion.button>
-              </Link>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={navigateToPortfolio}
+                className="group relative px-8 py-4 w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 rounded-full font-semibold text-white overflow-hidden shadow-xl transition-all hover:shadow-orange-500/30"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {carouselData[slideIndex].cta.primary}
+                  <MousePointer2 size={18} className="inline" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 translate-y-full group-hover:translate-y-0 transition-transform" />
+              </motion.button>
 
               <Link to="/contact">
                 <motion.button
@@ -256,7 +263,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
+      {/* Scroll Indicator - You can remove this since we're not scrolling anymore */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -271,7 +278,7 @@ const HomePage = () => {
           >
             <div className="w-1 h-2 bg-white/60 rounded-full" />
           </motion.div>
-          <span className="text-sm font-light">Scroll</span>
+          <span className="text-sm font-light">Explore</span>
         </div>
       </motion.div>
     </motion.div>

@@ -1,26 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import yusuf from './Yusuf.png';
 import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
 import sydney from './Sydney.png';
 import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide-react';
 
-// Custom Alert Component
 const Alert = ({ type, message }) => {
   const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
   const textColor = type === 'error' ? 'text-red-800' : 'text-green-800';
   const borderColor = type === 'error' ? 'border-red-200' : 'border-green-200';
 
-  return message ? (
-    <div className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4`}>
-      {message}
-    </div>
-  ) : null;
+  return (
+    <AnimatePresence>
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4`}
+        >
+          {message}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 };
 
-// Rest of the code remains the same until the testimonials data
 const defaultTestimonials = [
   {
     id: 1,
@@ -48,29 +55,37 @@ const defaultTestimonials = [
   }
 ];
 
-// Component definitions for TestimonialCard, SocialIcon, and FooterSection remain the same
 const TestimonialCard = ({ testimonial, isActive }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 20 }}
-    transition={{ duration: 0.5 }}
-    className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-blue-50 to-white p-8 shadow-xl"
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ 
+      opacity: isActive ? 1 : 0,
+      scale: isActive ? 1 : 0.8,
+      rotateY: isActive ? 0 : 180
+    }}
+    transition={{ 
+      duration: 0.8,
+      type: "spring",
+      stiffness: 100 
+    }}
+    className="absolute top-0 left-0 w-full"
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-orange-100/20 to-blue-100/20 opacity-50" />
-    <div className="relative z-10 flex flex-col md:flex-row items-center space-x-0 md:space-x-6">
-      <motion.div
-        whileHover={{ scale: 1.05 }}
-        className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-lg mb-4 md:mb-0"
-      >
-        <img src={testimonial.image} alt={testimonial.name} className="h-full w-full object-cover" />
-      </motion.div>
-      <div className="flex-1 text-center md:text-left">
-        <h3 className="bg-gradient-to-r from-blue-800 to-blue-600 bg-clip-text text-2xl font-bold text-black mb-2">
-          {testimonial.heading}
-        </h3>
-        <p className="text-gray-600 mb-4">{testimonial.text}</p>
-        <p className="text-orange-500 font-bold">{testimonial.name}</p>
-        <p className="text-gray-500">{testimonial.company}</p>
+    <div className="rounded-2xl bg-white p-8 shadow-xl">
+      <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-6">
+        <motion.div
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-gray-200 shadow-lg mb-4 md:mb-0"
+        >
+          <img src={testimonial.image} alt={testimonial.name} className="h-full w-full object-cover" />
+        </motion.div>
+        <div className="flex-1 text-center md:text-left">
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">
+            {testimonial.heading}
+          </h3>
+          <p className="text-gray-600 mb-4">{testimonial.text}</p>
+          <p className="text-gray-700 font-bold">{testimonial.name}</p>
+          <p className="text-gray-500">{testimonial.company}</p>
+        </div>
       </div>
     </div>
   </motion.div>
@@ -82,9 +97,9 @@ const SocialIcon = ({ Icon, href, label }) => (
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    whileHover={{ scale: 1.2 }}
+    whileHover={{ scale: 1.2, rotate: 360 }}
     whileTap={{ scale: 0.9 }}
-    className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md text-blue-900 hover:text-orange-500 hover:shadow-lg transition-all duration-300"
+    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 shadow-md text-gray-700 hover:text-gray-900 hover:shadow-lg transition-all duration-300"
   >
     <Icon size={20} />
   </motion.a>
@@ -97,7 +112,7 @@ const FooterSection = ({ title, children }) => (
     viewport={{ once: true }}
     className="relative"
   >
-    <h4 className="text-2xl font-bold text-white mb-4">{title}</h4>
+    <h4 className="text-2xl font-bold text-gray-100 mb-4">{title}</h4>
     {children}
   </motion.div>
 );
@@ -114,6 +129,15 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     }, 5000);
     return () => clearInterval(timer);
   }, [testimonials]);
+
+  useEffect(() => {
+    if (feedbackStatus.message) {
+      const timer = setTimeout(() => {
+        setFeedbackStatus({ type: '', message: '' });
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [feedbackStatus]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -159,7 +183,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="bg-gray-20 py-16">
+      <div className="bg-gray-25 py-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -167,13 +191,13 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             viewport={{ once: true }}
             className="mb-12 text-center"
           >
-            <h2 className="text-4xl font-bold text-black mb-4">
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
               What Our Clients Say
             </h2>
-            <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-300 mb-4" />
+            <div className="mx-auto h-1 w-24 rounded-full bg-gray-300 mb-4" />
           </motion.div>
 
-          <div className="relative">
+          <div className="relative h-[300px]">
             {testimonials.map((testimonial, index) => (
               <TestimonialCard
                 key={testimonial.id}
@@ -185,14 +209,14 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         </div>
       </div>
 
-      <footer className="bg-gradient-to-br from-blue-900 to-blue-800 text-white py-16">
+      <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             <FooterSection>
               <motion.img
                 src={LogoImage}
                 alt="Lockie Visuals Logo"
-                className="h-12 w-auto mb-6 filter invert"
+                className="h-12 w-auto mb-6 filter brightness-0 invert"
                 whileHover={{ scale: 1.05 }}
               />
               <div className="flex space-x-4">
@@ -212,7 +236,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                     whileHover={{ x: 5 }}
                     className="transition-colors duration-300"
                   >
-                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-orange-500">
+                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-gray-300">
                       {item}
                     </Link>
                   </motion.li>
@@ -228,7 +252,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                     whileHover={{ x: 5 }}
                     className="transition-colors duration-300"
                   >
-                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-orange-500">
+                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-gray-300">
                       {item}
                     </Link>
                   </motion.li>
@@ -253,9 +277,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            {feedbackStatus.message && (
-              <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
-            )}
+            <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
             
             <div className="flex flex-col sm:flex-row gap-4">
               <input
@@ -263,14 +285,14 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder="Share your thoughts with us"
-                className="flex-grow p-3 rounded-lg text-black focus:ring-2 focus:ring-orange-500 outline-none"
+                className="flex-grow p-3 rounded-lg text-black focus:ring-2 focus:ring-gray-500 outline-none"
                 disabled={isSubmitting}
               />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`bg-orange-500 text-white px-8 py-3 rounded-lg transition-colors duration-300 ${
-                  isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-600'
+                className={`bg-gray-700 text-white px-8 py-3 rounded-lg transition-colors duration-300 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
                 }`}
                 disabled={isSubmitting}
               >
@@ -280,7 +302,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
           </motion.form>
 
           <motion.div
-            className="mt-12 text-center text-gray-300"
+            className="mt-12 text-center text-gray-400"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}

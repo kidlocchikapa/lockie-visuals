@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {  Code, Palette } from 'lucide-react';
-import ServiceSection from '../servicessection';
+
 
 // Import images
 import atsogo from '../asserts/atsogo.jpg';
@@ -27,7 +27,7 @@ import online from '../asserts/Online.jpg';
 import somase from '../asserts/SomaseP.jpg';
 import unt from '../asserts/Untitled-1.jpg';
 
-const PortfolioSection = () => {
+const PortfolioSections = () => {
   const [selectedTab, setSelectedTab] = useState(null);
   const [hoveredImage, setHoveredImage] = useState(null);
 
@@ -65,7 +65,7 @@ const PortfolioSection = () => {
     <div className="bg-gradient-to-b from-gray-50 to-white py-16">
       <div className="max-w-7xl mx-auto px-4">
         {/* Services Section */}
-        <ServiceSection />
+   
 
         {/* Portfolio Header */}
         <div className="text-center mb-12">
@@ -163,4 +163,4 @@ const PortfolioSection = () => {
   );
 };
 
-export default PortfolioSection;
+export default PortfolioSections;

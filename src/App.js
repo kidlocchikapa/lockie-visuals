@@ -6,8 +6,10 @@ import OurServices from './Components/Services';
 import TeamSection from './Components/TeamSection';
 import Footer from './Components/Footer';
 import Maintainance from './Maintainance';
+
 import Login from './Login';
 import Signup from './signup';
+import PortfolioSections from './Components/Port';
 
 
 const App = () => {
@@ -24,6 +26,7 @@ const App = () => {
                <Footer/></>} />
           <Route path="/services" element={<OurServices/>} />
           <Route path="/dashboard" element={<Footer/>} />
+          <Route path="/portfolio" element={<PortfolioSections/>} />
           <Route path="/about" element={<Maintainance/>} />
           <Route path="/signup" element={<Signup/>} />
           <Route path="/login" element={<Login/>} />
