@@ -1,44 +1,65 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+const Alert = ({ type, message }) => {
+  const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
+  const textColor = type === "error" ? "text-red-800" : "text-green-800";
+  const borderColor = type === "error" ? "border-red-200" : "border-green-200";
+
+  return (
+    <div
+      className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4 shadow-md`}
+    >
+      {message}
+    </div>
+  );
+};
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 2000); // Visible for 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!email || !password) {
-      setError('Please fill in all fields.');
+      setError("Please fill in all fields.");
       return;
     }
 
     try {
       setIsLoading(true);
-      setError('');
+      setError("");
 
-      const response = await fetch('http://localhost:3000/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Login successful - redirect to dashboard
-        alert('Login successful!');
-        navigate('/dashboard');
+        alert("Login successful!");
+        navigate("/dashboard");
       } else {
-        // Show error message from the API
-        setError(data.message || 'Invalid credentials. Please try again.');
+        setError(data.message || "Invalid credentials. Please try again.");
       }
     } catch (error) {
-      setError('Network error. Please try again later.');
+      setError("Network error. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -48,24 +69,36 @@ function Login() {
     <div className="min-h-screen bg-white font-poppins flex items-center justify-center mt-auto px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Login</h2>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Login
+          </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+            >
               Sign-up here
             </Link>
           </p>
         </div>
-        {error && <p className="text-red-500 text-center">{error}</p>}
+        {error && <Alert type="error" message={error} />}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="email">
+              <label
+                className="block text-sm font-medium text-gray-700"
+                htmlFor="email"
+              >
                 Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <img src="email.png" alt="Email icon" className="h-5 w-5 text-gray-400" />
+                  <img
+                    src="email.png"
+                    alt="Email icon"
+                    className="h-5 w-5 text-gray-400"
+                  />
                 </div>
                 <input
                   id="email"
@@ -81,12 +114,19 @@ function Login() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="password">
+              <label
+                className="block text-sm font-medium text-gray-700"
+                htmlFor="password"
+              >
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <img src="padlock.png" alt="Password icon" className="h-5 w-5 text-gray-400" />
+                  <img
+                    src="padlock.png"
+                    alt="Password icon"
+                    className="h-5 w-5 text-gray-400"
+                  />
                 </div>
                 <input
                   id="password"
@@ -105,7 +145,10 @@ function Login() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <Link to="/" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link
+                to="/"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
                 Forgot your password?
               </Link>
             </div>
@@ -117,7 +160,7 @@ function Login() {
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               disabled={isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </div>
         </form>

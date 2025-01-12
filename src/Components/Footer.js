@@ -194,7 +194,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             <h2 className="text-4xl font-bold text-gray-800 mb-4">
               What Our Clients Say
             </h2>
-            <div className="mx-auto h-1 w-24 rounded-full bg-gray-300 mb-4" />
+            <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-300 mb-2" />
           </motion.div>
 
           <div className="relative h-[300px]">
@@ -214,9 +214,8 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             <FooterSection>
               <motion.img
-                src={LogoImage}
-                alt="Lockie Visuals Logo"
-                className="h-12 w-auto mb-6 filter brightness-0 invert"
+                
+                className="h-12 w-auto mb-6 mt-8 filter brightness-0 invert"
                 whileHover={{ scale: 1.05 }}
               />
               <div className="flex space-x-4">
