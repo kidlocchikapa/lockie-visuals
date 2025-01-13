@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide-react';
 import yusuf from './Yusuf.png';
 import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
 import sydney from './Sydney.png';
-import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide-react';
 
 const Alert = ({ type, message }) => {
   const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
@@ -118,10 +118,21 @@ const FooterSection = ({ title, children }) => (
 );
 
 const Footer = ({ testimonials = defaultTestimonials }) => {
+  const navigate = useNavigate();
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackStatus, setFeedbackStatus] = useState({ type: '', message: '' });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = () => {
+    const token = localStorage.getItem('accessToken');
+    setIsAuthenticated(!!token);
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -134,14 +145,24 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     if (feedbackStatus.message) {
       const timer = setTimeout(() => {
         setFeedbackStatus({ type: '', message: '' });
-      }, 2000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [feedbackStatus]);
 
+  const handleLoginClick = (e) => {
+    e.preventDefault(); // Prevent form submission
+    navigate('/login', { state: { returnUrl: window.location.pathname } });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!isAuthenticated) {
+      handleLoginClick(e);
+      return;
+    }
+
     if (!feedback.trim()) {
       setFeedbackStatus({
         type: 'error',
@@ -154,17 +175,31 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     setFeedbackStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('sql8.freemysqlhosting.net', {
+      const token = localStorage.getItem('accessToken');
+      console.log('Submitting feedback with token:', token); // Debug log
+
+      const response = await fetch('http://localhost:3000/feedback', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ content: feedback }),
       });
 
+      console.log('Response status:', response.status); // Debug log
+
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('accessToken');
+          setIsAuthenticated(false);
+          throw new Error('Session expired. Please login again.');
+        }
         throw new Error('Failed to submit feedback');
       }
+
+      const data = await response.json();
+      console.log('Response data:', data); // Debug log
 
       setFeedback('');
       setFeedbackStatus({
@@ -172,10 +207,17 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         message: 'Thank you for your feedback!'
       });
     } catch (error) {
+      console.error('Error submitting feedback:', error);
       setFeedbackStatus({
         type: 'error',
-        message: 'Failed to submit feedback. Please try again later.'
+        message: error.message || 'Failed to submit feedback. Please try again later.'
       });
+      
+      if (error.message.includes('Session expired')) {
+        setTimeout(() => {
+          navigate('/login', { state: { returnUrl: window.location.pathname } });
+        }, 2000);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -214,8 +256,9 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             <FooterSection>
               <motion.img
-                
-                className="h-12 w-auto mb-6 mt-8 filter brightness-0 invert"
+                src={LogoImage}
+                alt="Lockie Visuals Logo"
+                className="h-12 w-auto mb-6 filter brightness-0 invert"
                 whileHover={{ scale: 1.05 }}
               />
               <div className="flex space-x-4">
@@ -283,20 +326,33 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                 type="text"
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Share your thoughts with us"
+                placeholder={isAuthenticated ? "Share your thoughts with us" : "Please login to share feedback"}
                 className="flex-grow p-3 rounded-lg text-black focus:ring-2 focus:ring-gray-500 outline-none"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !isAuthenticated}
               />
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`bg-gray-700 text-white px-8 py-3 rounded-lg transition-colors duration-300 ${
-                  isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
-                }`}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </motion.button>
+              {isAuthenticated ? (
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`bg-gray-700 text-white px-8 py-3 rounded-lg transition-colors duration-300 ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
+                  }`}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
+                </motion.button>
+              ) : (
+                <motion.button
+                  type="button"
+                  onClick={handleLoginClick}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-gray-700 text-white px-8 py-3 rounded-lg hover:bg-gray-600 transition-colors duration-300"
+                >
+                  Login to Submit
+                </motion.button>
+              )}
             </div>
           </motion.form>
 

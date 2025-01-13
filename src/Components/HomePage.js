@@ -278,7 +278,7 @@ const HomePage = () => {
           >
             <div className="w-1 h-2 bg-white/60 rounded-full" />
           </motion.div>
-          <span className="text-sm font-light">Explore</span>
+          <span className="text-sm font-light">Scroll</span>
         </div>
       </motion.div>
     </motion.div>

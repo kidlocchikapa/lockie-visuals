@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Alert = ({ type, message }) => {
   const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
@@ -8,7 +8,7 @@ const Alert = ({ type, message }) => {
 
   return (
     <div
-      className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4 shadow-md`}
+      className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4 shadow-md animate-fade-in-down`}
     >
       {message}
     </div>
@@ -19,18 +19,32 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnUrl = location.state?.returnUrl;
 
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
         setError("");
-      }, 2000); // Visible for 2 seconds
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess("");
+        // Navigate to returnUrl if it exists, otherwise go to dashboard
+        navigate(returnUrl || "/dashboard");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate, returnUrl]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -43,6 +57,7 @@ function Login() {
     try {
       setIsLoading(true);
       setError("");
+      setSuccess("");
 
       const response = await fetch("http://localhost:3000/auth/login", {
         method: "POST",
@@ -53,8 +68,15 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Login successful!");
-        navigate("/dashboard");
+        // Store the token
+        localStorage.setItem('accessToken', data.access_token);
+        
+        // Set success message based on where user will be redirected
+        setSuccess(
+          returnUrl 
+            ? "Login successful! Returning to previous page..." 
+            : "Login successful! Redirecting to dashboard..."
+        );
       } else {
         setError(data.message || "Invalid credentials. Please try again.");
       }
@@ -72,17 +94,24 @@ function Login() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Login
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Sign-up here
-            </Link>
-          </p>
+          {returnUrl ? (
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Please login to submit your feedback
+            </p>
+          ) : (
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                Sign-up here
+              </Link>
+            </p>
+          )}
         </div>
         {error && <Alert type="error" message={error} />}
+        {success && <Alert type="success" message={success} />}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
