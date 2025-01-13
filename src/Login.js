@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from './Components/AuthContext'; // Added for authentication context
 
 const Alert = ({ type, message }) => {
   const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
@@ -26,7 +27,7 @@ function Login() {
   const location = useLocation();
   const returnUrl = location.state?.returnUrl;
 
-  const API_URL = "https://lockievisualdb.onrender.com";
+  const { login } = useAuth(); // Extract login method from context
 
   useEffect(() => {
     if (error) {
@@ -60,24 +61,17 @@ function Login() {
       setError("");
       setSuccess("");
 
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
+      const credentials = { email, password };
+      const success = await login(credentials); // Use login function
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("accessToken", data.access_token);
+      if (success) {
         setSuccess(
           returnUrl
             ? "Login successful! Returning to previous page..."
             : "Login successful! Redirecting to dashboard..."
         );
       } else {
-        setError(data.message || "Invalid credentials. Please try again.");
+        setError("Invalid credentials. Please try again.");
       }
     } catch (error) {
       setError("Network error. Please try again later.");
