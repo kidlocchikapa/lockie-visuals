@@ -43,7 +43,7 @@ const ServiceBookingDashboard = () => {
             <button
               className={`px-4 py-2 ${
                 activeTab === 'services' 
-                  ? 'border-b-2 border-blue-500 text-blue-500' 
+                  ? 'border-b-2 border-orange-500 text-orange-500' 
                   : 'text-gray-500'
               }`}
               onClick={() => setActiveTab('services')}
@@ -53,7 +53,7 @@ const ServiceBookingDashboard = () => {
             <button
               className={`px-4 py-2 ${
                 activeTab === 'bookings' 
-                  ? 'border-b-2 border-blue-500 text-blue-500' 
+                  ? 'border-b-2 border-orange-500 text-orange-500' 
                   : 'text-gray-500'
               }`}
               onClick={() => setActiveTab('bookings')}
@@ -77,7 +77,7 @@ const ServiceBookingDashboard = () => {
                   <span className="text-lg font-semibold">{service.price}</span>
                   <button
                     onClick={() => handleBookService(service)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
                   >
                     Book Now
                   </button>
