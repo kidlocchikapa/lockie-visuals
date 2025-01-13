@@ -178,7 +178,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
       const token = localStorage.getItem('accessToken');
       console.log('Submitting feedback with token:', token); // Debug log
 
-      const response = await fetch('http://localhost:3000/feedback', {
+      const response = await fetch('http://localhost:3000/feedback', 'https://lockievisualdb.onrender.com', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
