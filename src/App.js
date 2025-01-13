@@ -10,6 +10,8 @@ import ServiceBookingDashboard from './Dash';
 import Login from './Login';
 import Signup from './signup';
 import PortfolioSections from './Components/Port';
+import AboutUs from './Components/AboutUS';
+import ContactUs from './Components/ContactUs';
 
 
 const App = () => {
@@ -27,10 +29,10 @@ const App = () => {
           <Route path="/services" element={<OurServices/>} />
           <Route path="/dashboard" element={<ServiceBookingDashboard/>} />
           <Route path="/portfolio" element={<PortfolioSections/>} />
-          <Route path="/about" element={<Maintainance/>} />
+          <Route path="/about" element={<AboutUs/>} />
           <Route path="/signup" element={<Signup/>} />
           <Route path="/login" element={<Login/>} />
-          <Route path ="/contact" element={<Maintainance/>} />
+          <Route path ="/contact" element={<ContactUs/>} />
           <Route path ="/Marketing" element={<Maintainance/>} />
           <Route path ="/web-development" element={<Maintainance/>} />
           <Route path ="/graphic-designing" element={<Maintainance/>} />

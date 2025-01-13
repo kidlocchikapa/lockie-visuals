@@ -1,92 +1,88 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
+import { ArrowRight, Monitor, Smartphone, Code, PenTool, Megaphone } from 'lucide-react';
 
-const teamMembers = [
-  { name: 'John Doe', role: 'CEO', image: 'https://api.placeholderimage.com/300x300?text=CEO' },
-  { name: 'Jane Smith', role: 'Lead Developer', image: 'https://api.placeholderimage.com/300x300?text=Developer' },
-  { name: 'Mike Johnson', role: 'Manager', image: 'https://api.placeholderimage.com/300x300?text=Manager' },
-  { name: 'Sarah Brown', role: 'Lead Designer', image: 'https://api.placeholderimage.com/300x300?text=Designer' },
-];
-
-const ContactItem = ({ Icon, text, href }) => (
-  <a href={href} className="flex items-center space-x-2 text-blue-800 hover:text-orange-500 transition-colors duration-300">
-    <Icon size={20} />
-    <span>{text}</span>
-  </a>
-);
-
-const AboutUs = () => {
+export default function AboutUs() {
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-orange-50 min-h-screen font-sans">
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold text-blue-900 mb-8 text-center">About Lockie Visuals</h1>
-        
-        {/* Company Description */}
-        <section className="mb-12 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold text-blue-800 mb-4">Who We Are</h2>
-          <p className="text-gray-700 leading-relaxed">
-            Lockie Visuals is a dynamic company specializing in graphic design, web development, and marketing solutions. We blend creativity with technical expertise to deliver stunning visuals and powerful digital experiences that help our clients stand out in today's competitive market.
+    <div className="min-h-screen bg-gray-100 text-gray-900 ">
+      {/* Hero Section */}
+      <div className="px-6 py-24">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-5xl font-bold mb-6">About Us</h1>
+          <p className="text-xl text-gray-700 max-w-2xl">
+            We are a full-service digital agency passionate about transforming ideas into powerful digital solutions. With expertise across multiple domains, we help businesses thrive in the digital landscape.
           </p>
-        </section>
-        
-        {/* Vision and Goals */}
-        <section className="mb-12 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold text-blue-800 mb-4">Our Vision & Goals</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-xl font-semibold text-orange-600 mb-2">Vision</h3>
-              <p className="text-gray-700">To be the leading creative force in digital design and marketing, empowering businesses to thrive in the digital age.</p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-orange-600 mb-2">Goals</h3>
-              <ul className="list-disc list-inside text-gray-700">
-                <li>Deliver innovative and impactful design solutions</li>
-                <li>Provide cutting-edge web development services</li>
-                <li>Offer strategic marketing campaigns that drive results</li>
-                <li>Foster long-term partnerships with our clients</li>
-              </ul>
-            </div>
+        </div>
+      </div>
+
+      {/* Mission Section */}
+      <div className="px-6 py-16 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-8">Our Mission</h2>
+          <p className="text-xl text-gray-700 max-w-3xl">
+            To empower businesses with cutting-edge digital solutions that drive growth, enhance user experience, and create lasting impact in the digital world.
+          </p>
+        </div>
+      </div>
+
+      {/* Services Section */}
+      <div className="px-6 py-16 bg-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12">What We Do</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <ServiceCard 
+              icon={<PenTool className="w-8 h-8 text-orange-500" />}
+              title="Graphic Design"
+              description="Creative designs that communicate your brand's story effectively and leave a lasting impression."
+            />
+            <ServiceCard 
+              icon={<Megaphone className="w-8 h-8 text-orange-500" />}
+              title="Marketing"
+              description="Strategic digital marketing solutions to boost your online presence and drive meaningful engagement."
+            />
+            <ServiceCard 
+              icon={<Monitor className="w-8 h-8 text-orange-500" />}
+              title="Website Development"
+              description="Custom, responsive websites that provide seamless user experience across all devices."
+            />
+            <ServiceCard 
+              icon={<Code className="w-8 h-8 text-orange-500" />}
+              title="Custom Software"
+              description="Tailored software solutions that streamline your business processes and boost efficiency."
+            />
+            <ServiceCard 
+              icon={<Smartphone className="w-8 h-8 text-orange-500" />}
+              title="Mobile App Development"
+              description="Native and cross-platform mobile applications that engage users and deliver value."
+            />
           </div>
-        </section>
-        
-        {/* Team Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-blue-800 mb-6 text-center">Meet Our Team</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <img src={member.image} alt={member.name} className="w-full h-48 object-cover" />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-blue-900">{member.name}</h3>
-                  <p className="text-orange-600">{member.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-        {/* Contact Section */}
-        <section className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold text-blue-800 mb-4">Get in Touch</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <ContactItem Icon={Mail} text="info@lockievisuals.com" href="mailto:info@lockievisuals.com" />
-              <ContactItem Icon={Phone} text="+265 990 155 300" href="tel:+265990155300" />
-              <ContactItem Icon={MapPin} text="Zomba, UNIMA - Malawi" href="#" />
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-orange-600 mb-2">Follow Us</h3>
-              <div className="flex space-x-4">
-                <ContactItem Icon={Instagram} text="Instagram" href="https://www.instagram.com/lockievisuals" />
-                <ContactItem Icon={Facebook} text="Facebook" href="https://www.facebook.com/lockievisuals" />
-                <ContactItem Icon={Twitter} text="Twitter" href="https://twitter.com/lockievisuals" />
-              </div>
-            </div>
-          </div>
-        </section>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="px-6 py-16 bg-white">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to Transform Your Digital Presence?</h2>
+          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
+            Let's collaborate to bring your vision to life with our comprehensive digital solutions.
+          </p>
+          <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg flex items-center gap-2 mx-auto transition-colors">
+            Get Started
+            <ArrowRight className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
   );
-};
+}
 
-export default AboutUs;
+const ServiceCard = ({ icon, title, description }) => {
+  return (
+    <div className="p-6 bg-white rounded-lg hover:shadow-lg transition-shadow">
+      <div className="mb-4">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold mb-3">{title}</h3>
+      <p className="text-gray-700">{description}</p>
+    </div>
+  );
+}
