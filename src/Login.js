@@ -41,7 +41,6 @@ function Login() {
     if (success) {
       const timer = setTimeout(() => {
         setSuccess("");
-        // Navigate to returnUrl if it exists, otherwise go to dashboard
         navigate(returnUrl || "/dashboard");
       }, 2000);
       return () => clearTimeout(timer);
@@ -65,19 +64,16 @@ function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: 'include', // Include cookies in the request
+        credentials: "include",
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Store the token
-        localStorage.setItem('accessToken', data.access_token);
-        
-        // Set success message based on where user will be redirected
+        localStorage.setItem("accessToken", data.access_token);
         setSuccess(
-          returnUrl 
-            ? "Login successful! Returning to previous page..." 
+          returnUrl
+            ? "Login successful! Returning to previous page..."
             : "Login successful! Redirecting to dashboard..."
         );
       } else {
@@ -91,8 +87,8 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-poppins flex items-center justify-center mt-auto px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-md">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Login
@@ -106,7 +102,7 @@ function Login() {
               Don't have an account?{" "}
               <Link
                 to="/signup"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-orange-500 hover:text-orange-600"
               >
                 Sign-up here
               </Link>
@@ -138,7 +134,7 @@ function Login() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -166,7 +162,7 @@ function Login() {
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -179,7 +175,7 @@ function Login() {
             <div className="text-sm">
               <Link
                 to="/"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-orange-500 hover:text-orange-600"
               >
                 Forgot your password?
               </Link>
@@ -189,7 +185,7 @@ function Login() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
               disabled={isLoading}
             >
               {isLoading ? "Logging in..." : "Login"}

@@ -18,7 +18,7 @@ function Head() {
   ];
 
   return (
-    <nav className="bg-white font-medium text-black relative px-4 sm:px-6 sm:bg-transparent font-guton lg:px-8">
+    <nav className="bg-gray-100 text-gray-900 font-medium font-poppins relative px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 w-40">
@@ -27,16 +27,16 @@ function Head() {
             </Link>
           </div>
           <div className="hidden md:block">
-            <ul className="flex space-x-4 text-sm font-poppins font-medium">
+            <ul className="flex space-x-6 text-sm">
               <li className="relative group">
                 <button
                   onClick={toggleDropdown}
-                  className="px-4 py-2 flex items-center hover:bg-gray-100 rounded-md"
+                  className="px-4 py-2 flex items-center hover:text-orange-500 transition-colors"
                 >
                   Solutions <ChevronDown className="ml-1 h-4 w-4" />
                 </button>
                 <ul
-                  className={`absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 shadow-lg z-50 transform transition-all duration-300 ease-in-out ${
+                  className={`absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 shadow-lg z-50 rounded-lg transition-all duration-300 ease-in-out ${
                     isDropdownOpen
                       ? 'opacity-100 scale-100 visible'
                       : 'opacity-0 scale-95 invisible'
@@ -46,7 +46,7 @@ function Head() {
                     <li key={index}>
                       <Link
                         to={`/${solution.toLowerCase().replace(/\s/g, '-')}`}
-                        className="block px-6 py-4 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-orange-500 rounded-lg transition-colors"
                       >
                         {solution}
                       </Link>
@@ -54,22 +54,22 @@ function Head() {
                   ))}
                 </ul>
               </li>
-              <li className="px-4 py-2">
+              <li className="px-4 py-2 hover:text-orange-500 transition-colors">
                 <Link to="/about">About Us</Link>
               </li>
-              <li className="px-4 py-2">
+              <li className="px-4 py-2 hover:text-orange-500 transition-colors">
                 <Link to="/contact">Contact</Link>
               </li>
               <li>
                 <Link to="/signup">
-                  <button className="px-4 py-2 ring-blue-900 bg-gray-100 ring-1 hover:bg-gray-200 rounded-md">
+                  <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors">
                     Sign Up
                   </button>
                 </Link>
               </li>
               <li>
                 <Link to="/login">
-                  <button className="px-4 py-2 text-white bg-blue-800 rounded-md hover:bg-blue-700">
+                  <button className="px-4 py-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors">
                     Login
                   </button>
                 </Link>
@@ -79,9 +79,9 @@ function Head() {
           <div className="md:hidden">
             <button onClick={toggleMenu}>
               {isMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6 text-gray-900" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-6 w-6 text-gray-900" />
               )}
             </button>
           </div>
@@ -90,17 +90,17 @@ function Head() {
       <div
         className={`fixed inset-y-0 right-0 z-40 w-64 bg-white transform ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        } transition-transform duration-300 ease-in-out`}
+        } transition-transform duration-300 ease-in-out shadow-lg`}
       >
         <div className="p-4">
           <button onClick={toggleMenu} className="mb-4">
-            <X className="h-6 w-6" />
+            <X className="h-6 w-6 text-gray-900" />
           </button>
           <ul className="space-y-4">
             <li className="relative group">
               <button
                 onClick={toggleDropdown}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left flex items-center justify-between"
+                className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-gray-100 w-full text-left flex items-center justify-between transition-colors"
               >
                 Solutions
                 <ChevronRight className="h-4 w-4" />
@@ -111,7 +111,7 @@ function Head() {
                     <li key={index}>
                       <Link
                         to={`/${solution.toLowerCase().replace(/\s/g, '-')}`}
-                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
+                        className="block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors"
                       >
                         {solution}
                       </Link>
@@ -121,25 +121,31 @@ function Head() {
               )}
             </li>
             <li>
-              <Link to="/about" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+              <Link
+                to="/about"
+                className="block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors"
+              >
                 About Us
               </Link>
             </li>
             <li>
-              <Link to="/contact" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+              <Link
+                to="/contact"
+                className="block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors"
+              >
                 Contact
               </Link>
             </li>
             <li>
-              <Link to="/signup" className="block w-full text-left">
-                <button className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+              <Link to="/signup">
+                <button className="w-full text-left block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors">
                   Sign Up
                 </button>
               </Link>
             </li>
             <li>
-              <Link to="/login" className="block w-full text-left">
-                <button className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-800 hover:bg-blue-700">
+              <Link to="/login">
+                <button className="w-full text-left block px-3 py-2 rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors">
                   Login
                 </button>
               </Link>

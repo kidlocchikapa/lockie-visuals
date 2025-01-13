@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, Monitor, Smartphone, Code, PenTool, Megaphone } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function AboutUs() {
   return (
@@ -65,10 +66,11 @@ export default function AboutUs() {
           <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
             Let's collaborate to bring your vision to life with our comprehensive digital solutions.
           </p>
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg flex items-center gap-2 mx-auto transition-colors">
+          <Link to="/signup"> <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg flex items-center gap-2 mx-auto transition-colors">
             Get Started
             <ArrowRight className="w-5 h-5" />
           </button>
+          </Link>
         </div>
       </div>
     </div>
