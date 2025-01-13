@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import LogoImage from '../asserts/LogoImage.png';
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAuth } from './AuthContext'; // Import useAuth hook
 
 function Head() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { user, logout } = useAuth(); // Use the auth context
+  // Add state for user authentication (in a real app, this would come from your auth context/state management)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
@@ -18,11 +18,6 @@ function Head() {
     'Web Development',
     'Marketing',
   ];
-
-  const handleLogout = async () => {
-    await logout();
-    // You can add navigation here if needed
-  };
 
   return (
     <nav className="bg-gray-100 text-gray-900 font-medium font-poppins relative px-4 sm:px-6 lg:px-8">
@@ -61,8 +56,8 @@ function Head() {
                   ))}
                 </ul>
               </li>
-              {/* Dashboard link - only shown when user is logged in */}
-              {user && (
+              {/* Dashboard link - only shown when logged in */}
+              {isLoggedIn && (
                 <li className="px-4 py-2 hover:text-orange-500 transition-colors">
                   <Link to="/dashboard">Dashboard</Link>
                 </li>
@@ -73,7 +68,7 @@ function Head() {
               <li className="px-4 py-2 hover:text-orange-500 transition-colors">
                 <Link to="/contact">Contact</Link>
               </li>
-              {!user ? (
+              {!isLoggedIn ? (
                 <>
                   <li>
                     <Link to="/signup">
@@ -93,7 +88,7 @@ function Head() {
               ) : (
                 <li>
                   <button 
-                    onClick={handleLogout}
+                    onClick={() => setIsLoggedIn(false)}
                     className="px-4 py-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
                   >
                     Logout
@@ -102,7 +97,6 @@ function Head() {
               )}
             </ul>
           </div>
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <button onClick={toggleMenu}>
               {isMenuOpen ? (
@@ -114,7 +108,6 @@ function Head() {
           </div>
         </div>
       </div>
-      {/* Mobile menu */}
       <div
         className={`fixed inset-y-0 right-0 z-40 w-64 bg-white transform ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
@@ -149,7 +142,7 @@ function Head() {
               )}
             </li>
             {/* Dashboard link in mobile menu - only shown when logged in */}
-            {user && (
+            {isLoggedIn && (
               <li>
                 <Link
                   to="/dashboard"
@@ -175,7 +168,7 @@ function Head() {
                 Contact
               </Link>
             </li>
-            {!user ? (
+            {!isLoggedIn ? (
               <>
                 <li>
                   <Link to="/signup">
@@ -195,7 +188,7 @@ function Head() {
             ) : (
               <li>
                 <button 
-                  onClick={handleLogout}
+                  onClick={() => setIsLoggedIn(false)}
                   className="w-full text-left block px-3 py-2 rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors"
                 >
                   Logout
