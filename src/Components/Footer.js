@@ -7,6 +7,8 @@ import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
 import sydney from './Sydney.png';
 
+const API_URL = "https://lockievisualdb.onrender.com";
+
 const Alert = ({ type, message }) => {
   const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
   const textColor = type === 'error' ? 'text-red-800' : 'text-green-800';
@@ -69,22 +71,23 @@ const TestimonialCard = ({ testimonial, isActive }) => (
       stiffness: 100 
     }}
     className="absolute top-0 left-0 w-full"
+    style={{ display: isActive ? 'block' : 'none' }} // Add this line to prevent overlap
   >
-    <div className="rounded-2xl bg-white p-8 shadow-xl">
+    <div className="rounded-2xl bg-white p-4 md:p-8 shadow-xl">
       <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-6">
         <motion.div
           whileHover={{ scale: 1.1, rotate: 5 }}
-          className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-gray-200 shadow-lg mb-4 md:mb-0"
+          className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-4 border-gray-200 shadow-lg mb-4 md:mb-0 flex-shrink-0"
         >
           <img src={testimonial.image} alt={testimonial.name} className="h-full w-full object-cover" />
         </motion.div>
         <div className="flex-1 text-center md:text-left">
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">
+          <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
             {testimonial.heading}
           </h3>
-          <p className="text-gray-600 mb-4">{testimonial.text}</p>
+          <p className="text-sm md:text-base text-gray-600 mb-4">{testimonial.text}</p>
           <p className="text-gray-700 font-bold">{testimonial.name}</p>
-          <p className="text-gray-500">{testimonial.company}</p>
+          <p className="text-sm text-gray-500">{testimonial.company}</p>
         </div>
       </div>
     </div>
@@ -112,7 +115,7 @@ const FooterSection = ({ title, children }) => (
     viewport={{ once: true }}
     className="relative"
   >
-    <h4 className="text-2xl font-bold text-gray-100 mb-4">{title}</h4>
+    <h4 className="text-xl md:text-2xl font-bold text-gray-100 mb-4">{title}</h4>
     {children}
   </motion.div>
 );
@@ -151,7 +154,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
   }, [feedbackStatus]);
 
   const handleLoginClick = (e) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     navigate('/login', { state: { returnUrl: window.location.pathname } });
   };
 
@@ -176,18 +179,16 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
     try {
       const token = localStorage.getItem('accessToken');
-      console.log('Submitting feedback with token:', token); // Debug log
 
-      const response = await fetch('http://localhost:3000/feedback', 'https://lockievisualdb.onrender.com', {
+      const response = await fetch(`${API_URL}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify({ content: feedback }),
       });
-
-      console.log('Response status:', response.status); // Debug log
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -199,7 +200,6 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
       }
 
       const data = await response.json();
-      console.log('Response data:', data); // Debug log
 
       setFeedback('');
       setFeedbackStatus({
@@ -225,21 +225,21 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="bg-gray-25 py-16">
+      <div className="bg-gray-25 py-8 md:py-16 mb-8">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-12 text-center"
+            className="mb-8 md:mb-12 text-center"
           >
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               What Our Clients Say
             </h2>
             <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-300 mb-2" />
           </motion.div>
 
-          <div className="relative h-[300px]">
+          <div className="relative h-[400px] md:h-[300px] mb-8">
             {testimonials.map((testimonial, index) => (
               <TestimonialCard
                 key={testimonial.id}
@@ -251,9 +251,9 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         </div>
       </div>
 
-      <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-16">
+      <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-12 md:py-16 mt-auto">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             <FooterSection>
               <motion.img
                 src={LogoImage}
@@ -261,7 +261,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                 className="h-12 w-auto mb-6 filter brightness-0 invert"
                 whileHover={{ scale: 1.05 }}
               />
-              <div className="flex space-x-4">
+              <div className="flex flex-wrap gap-4">
                 <SocialIcon Icon={Instagram} href="https://instagram.com/lockievisuals" label="Instagram" />
                 <SocialIcon Icon={Facebook} href="https://facebook.com/lockievisuals" label="Facebook" />
                 <SocialIcon Icon={MessageCircle} href="https://wa.me/265990155300" label="WhatsApp" />
@@ -303,7 +303,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             </FooterSection>
 
             <FooterSection title="Contact Info">
-              <motion.div className="space-y-3">
+              <motion.div className="space-y-3 text-sm md:text-base">
                 <p>Zomba, UNIMA - Malawi</p>
                 <p>contacts : +265 (0) 990 155 300</p>
                 <p>+265 (0) 888 777 332</p>
@@ -357,7 +357,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
           </motion.form>
 
           <motion.div
-            className="mt-12 text-center text-gray-400"
+            className="mt-12 text-center text-gray-400 text-sm md:text-base"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}

@@ -26,6 +26,8 @@ function Login() {
   const location = useLocation();
   const returnUrl = location.state?.returnUrl;
 
+  const API_URL = "https://lockievisualdb.onrender.com";
+
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -59,10 +61,11 @@ function Login() {
       setError("");
       setSuccess("");
 
-      const response = await fetch("http://localhost:3000/auth/login", "https://lockievisualdb.onrender.com", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: 'include', // Include cookies in the request
       });
 
       const data = await response.json();
