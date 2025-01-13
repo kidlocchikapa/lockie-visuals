@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 function Head() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // Add state for user authentication (in a real app, this would come from your auth context/state management)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
@@ -54,26 +56,45 @@ function Head() {
                   ))}
                 </ul>
               </li>
+              {/* Dashboard link - only shown when logged in */}
+              {isLoggedIn && (
+                <li className="px-4 py-2 hover:text-orange-500 transition-colors">
+                  <Link to="/dashboard">Dashboard</Link>
+                </li>
+              )}
               <li className="px-4 py-2 hover:text-orange-500 transition-colors">
                 <Link to="/about">About Us</Link>
               </li>
               <li className="px-4 py-2 hover:text-orange-500 transition-colors">
                 <Link to="/contact">Contact</Link>
               </li>
-              <li>
-                <Link to="/signup">
-                  <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors">
-                    Sign Up
+              {!isLoggedIn ? (
+                <>
+                  <li>
+                    <Link to="/signup">
+                      <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors">
+                        Sign Up
+                      </button>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/login">
+                      <button className="px-4 py-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors">
+                        Login
+                      </button>
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <button 
+                    onClick={() => setIsLoggedIn(false)}
+                    className="px-4 py-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
+                  >
+                    Logout
                   </button>
-                </Link>
-              </li>
-              <li>
-                <Link to="/login">
-                  <button className="px-4 py-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors">
-                    Login
-                  </button>
-                </Link>
-              </li>
+                </li>
+              )}
             </ul>
           </div>
           <div className="md:hidden">
@@ -120,6 +141,17 @@ function Head() {
                 </ul>
               )}
             </li>
+            {/* Dashboard link in mobile menu - only shown when logged in */}
+            {isLoggedIn && (
+              <li>
+                <Link
+                  to="/dashboard"
+                  className="block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors"
+                >
+                  Dashboard
+                </Link>
+              </li>
+            )}
             <li>
               <Link
                 to="/about"
@@ -136,20 +168,33 @@ function Head() {
                 Contact
               </Link>
             </li>
-            <li>
-              <Link to="/signup">
-                <button className="w-full text-left block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors">
-                  Sign Up
+            {!isLoggedIn ? (
+              <>
+                <li>
+                  <Link to="/signup">
+                    <button className="w-full text-left block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors">
+                      Sign Up
+                    </button>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login">
+                    <button className="w-full text-left block px-3 py-2 rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors">
+                      Login
+                    </button>
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <li>
+                <button 
+                  onClick={() => setIsLoggedIn(false)}
+                  className="w-full text-left block px-3 py-2 rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors"
+                >
+                  Logout
                 </button>
-              </Link>
-            </li>
-            <li>
-              <Link to="/login">
-                <button className="w-full text-left block px-3 py-2 rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors">
-                  Login
-                </button>
-              </Link>
-            </li>
+              </li>
+            )}
           </ul>
         </div>
       </div>

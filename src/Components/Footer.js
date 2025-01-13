@@ -278,7 +278,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                     whileHover={{ x: 5 }}
                     className="transition-colors duration-300"
                   >
-                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-gray-300">
+                    <Link to={`/${item.toLowerCase().replace(' ')}`} className="hover:text-gray-300">
                       {item}
                     </Link>
                   </motion.li>
@@ -288,7 +288,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
             <FooterSection title="Services">
               <motion.ul className="space-y-3">
-                {['Contact Sales', 'Solutions', 'Login', 'Create Account'].map((item) => (
+                {['Contact', 'Solutions', 'Login', 'signup'].map((item) => (
                   <motion.li
                     key={item}
                     whileHover={{ x: 5 }}
