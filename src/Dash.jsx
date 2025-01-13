@@ -2,29 +2,33 @@ import React, { useState } from 'react';
 
 const ServiceBookingDashboard = () => {
   const [activeTab, setActiveTab] = useState('services');
-  const [bookings, setBookings] = useState([
-    { id: 1, service: 'Graphic Design', date: '2025-01-15', status: 'Completed' },
-    { id: 2, service: 'Website Development', date: '2025-01-20', status: 'Pending' }
-  ]);
+  const [bookings, setBookings] = useState([]);
 
   const services = [
     {
       id: 1,
       name: 'Graphic Design',
       description: 'Professional graphic design services for your brand',
-      price: '$99/hour'
+      price: 'MWK 75,000/hour',
     },
     {
       id: 2,
       name: 'Website Development',
       description: 'Custom website development solutions',
-      price: '$149/hour'
-    }
+      price: 'MWK 113,000/hour',
+    },
   ];
 
   const handleBookService = (service) => {
-    // In a real app, this would open a booking form or modal
-    console.log(`Booking ${service.name}`);
+    const newBooking = {
+      id: bookings.length + 1,
+      service: service.name,
+      date: new Date().toISOString().split('T')[0], // Today's date
+      status: 'Pending',
+    };
+
+    setBookings((prevBookings) => [...prevBookings, newBooking]);
+    alert(`Service "${service.name}" booked successfully!`);
   };
 
   return (
@@ -42,8 +46,8 @@ const ServiceBookingDashboard = () => {
           <div className="flex gap-4 border-b">
             <button
               className={`px-4 py-2 ${
-                activeTab === 'services' 
-                  ? 'border-b-2 border-orange-500 text-orange-500' 
+                activeTab === 'services'
+                  ? 'border-b-2 border-orange-500 text-orange-500'
                   : 'text-gray-500'
               }`}
               onClick={() => setActiveTab('services')}
@@ -52,8 +56,8 @@ const ServiceBookingDashboard = () => {
             </button>
             <button
               className={`px-4 py-2 ${
-                activeTab === 'bookings' 
-                  ? 'border-b-2 border-orange-500 text-orange-500' 
+                activeTab === 'bookings'
+                  ? 'border-b-2 border-orange-500 text-orange-500'
                   : 'text-gray-500'
               }`}
               onClick={() => setActiveTab('bookings')}
@@ -67,8 +71,8 @@ const ServiceBookingDashboard = () => {
         {activeTab === 'services' ? (
           <div className="grid md:grid-cols-2 gap-6">
             {services.map((service) => (
-              <div 
-                key={service.id} 
+              <div
+                key={service.id}
                 className="bg-white rounded-lg p-6 shadow-sm"
               >
                 <h3 className="text-xl font-semibold mb-2">{service.name}</h3>
@@ -89,26 +93,32 @@ const ServiceBookingDashboard = () => {
           <div className="bg-white rounded-lg shadow-sm">
             <div className="p-6">
               <h2 className="text-xl font-semibold mb-4">Booking History</h2>
-              <div className="space-y-4">
-                {bookings.map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div>
-                      <h3 className="font-medium">{booking.service}</h3>
-                      <p className="text-sm text-gray-500">{booking.date}</p>
+              {bookings.length > 0 ? (
+                <div className="space-y-4">
+                  {bookings.map((booking) => (
+                    <div
+                      key={booking.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div>
+                        <h3 className="font-medium">{booking.service}</h3>
+                        <p className="text-sm text-gray-500">{booking.date}</p>
+                      </div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          booking.status === 'Completed'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        {booking.status}
+                      </span>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      booking.status === 'Completed' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {booking.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">You have no bookings yet.</p>
+              )}
             </div>
           </div>
         )}
