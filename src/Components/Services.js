@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {  Code, Palette } from 'lucide-react';
+import { Code, Palette } from 'lucide-react';
 import ServiceSection from '../servicessection';
 
 // Import images
@@ -57,7 +57,7 @@ const PortfolioSection = () => {
   ];
 
   const tabs = [
-    { id: 'designing', label: 'Design', icon: Palette },
+    { id: 'designing', label: 'Designs', icon: Palette },
     { id: 'development', label: 'Development', icon: Code }
   ];
 
@@ -131,22 +131,21 @@ const PortfolioSection = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className="group relative aspect-square  overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="group relative aspect-square overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300"
                       onHoverStart={() => setHoveredImage(index)}
                       onHoverEnd={() => setHoveredImage(null)}
                     >
                       <img
                         src={img.src}
                         alt={img.alt}
-                        className="w-full h-full object-cover transition-transform duration-500
-                          group-hover:scale-110"
+                        loading="lazy" // Lazy load images
+                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                       />
                       {hoveredImage === index && (
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent
-                            flex items-end p-6"
+                          className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6"
                         >
                           <p className="text-white font-medium">{img.alt}</p>
                         </motion.div>
