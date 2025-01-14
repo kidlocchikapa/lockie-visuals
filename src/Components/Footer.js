@@ -5,7 +5,7 @@ import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide
 import yusuf from './Yusuf.png';
 import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
-import sydney from './Sydney.png';
+import Pasco from '../asserts/Pasco.png'
 
 const API_URL = "https://lockievisualdb.onrender.com";
 
@@ -33,11 +33,11 @@ const Alert = ({ type, message }) => {
 const defaultTestimonials = [
   {
     id: 1,
-    image: sydney,
-    name: "John Doe",
-    heading: "Exceptional Photography",
-    text: "Working with Lockie Visuals was an absolute pleasure. Their attention to detail and creativity exceeded our expectations.",
-    company: "Creative Studios"
+    image: Pasco,
+    name: "Pasco",
+    heading: "Exceptional Graphics",
+    text: "Thank you for the exceptional experience! Your artistic designs surpassed my expectations, Speaking for themselves with their impeccable quality. I felt warmly welcomed, genuinely understood and valued throughout our interaction. Kudos to you.",
+    company: "Student"
   },
   {
     id: 2,

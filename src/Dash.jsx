@@ -26,7 +26,7 @@ const ServiceBookingDashboard = () => {
     setConfirmingService(service);
   };
 
-  const confirmBooking = () => {
+  const confirmBooking = async () => {
     if (confirmingService) {
       const newBooking = {
         id: bookings.length + 1,
@@ -35,8 +35,33 @@ const ServiceBookingDashboard = () => {
         status: 'Pending',
       };
 
+      // Save booking locally
       setBookings((prevBookings) => [...prevBookings, newBooking]);
       setNotification(`Successfully booked "${confirmingService.name}"!`);
+
+      // Send booking details to the NestJS API
+      try {
+        const response = await fetch('https://lockievisualdb.onrender.com', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            serviceName: confirmingService.name,
+            userEmail: 'testuser@example.com', // Replace with actual user's email
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to send booking to the server');
+        }
+
+        console.log('Booking notification sent successfully!');
+      } catch (error) {
+        console.error('Error sending booking:', error);
+      }
+
+      // Clear confirmation modal
       setConfirmingService(null);
 
       // Clear notification after 2 seconds
