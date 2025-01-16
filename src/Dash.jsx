@@ -9,7 +9,7 @@ const ServiceBookingDashboard = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   
-  const BOOKINGS_API = 'https://lockievisualbackend.onrender.com';
+  const BOOKINGS_API = 'https://lockievisualbackend.onrender.com/bookings';
 
   const services = [
     {
