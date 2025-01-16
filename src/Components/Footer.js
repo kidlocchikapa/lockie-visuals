@@ -5,10 +5,9 @@ import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide
 import yusuf from './Yusuf.png';
 import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
-import Pasco from '../asserts/Pasco.png';
+import Pasco from '../asserts/Pasco.png'
 
-
-const API_URL = "https://lockievisualbackend.onrender.com"; // New endpoint
+const API_URL = "https://lockievisualbackend.onrender.com";
 
 const Alert = ({ type, message }) => {
   const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
@@ -61,18 +60,18 @@ const defaultTestimonials = [
 const TestimonialCard = ({ testimonial, isActive }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.8 }}
-    animate={{
+    animate={{ 
       opacity: isActive ? 1 : 0,
       scale: isActive ? 1 : 0.8,
       rotateY: isActive ? 0 : 180
     }}
-    transition={{
+    transition={{ 
       duration: 0.8,
       type: "spring",
-      stiffness: 100
+      stiffness: 100 
     }}
     className="absolute top-0 left-0 w-full"
-    style={{ display: isActive ? 'block' : 'none' }} // Prevent overlap
+    style={{ display: isActive ? 'block' : 'none' }}
   >
     <div className="rounded-2xl bg-white p-4 md:p-8 shadow-xl">
       <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-6">
@@ -161,7 +160,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!isAuthenticated) {
       handleLoginClick(e);
       return;
@@ -213,7 +212,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         type: 'error',
         message: error.message || 'Failed to submit feedback. Please try again later.'
       });
-
+      
       if (error.message.includes('Session expired')) {
         setTimeout(() => {
           navigate('/login', { state: { returnUrl: window.location.pathname } });
