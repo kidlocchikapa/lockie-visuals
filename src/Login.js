@@ -26,7 +26,7 @@ function Login() {
   const location = useLocation();
   const returnUrl = location.state?.returnUrl;
 
-  const API_URL = "https://lockievisualbackend.onrender.com/signup";
+  const API_URL = "https://lockievisualbackend.onrender.com";
 
   useEffect(() => {
     // Clear any existing tokens on component mount
@@ -65,7 +65,7 @@ function Login() {
       setError("");
       setSuccess("");
 
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
