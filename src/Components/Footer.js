@@ -5,11 +5,10 @@ import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide
 import yusuf from './Yusuf.png';
 import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
-import Pasco from '../asserts/Pasco.png';
+import Pasco from '../asserts/Pasco.png'
 
-const API_URL = "https://lockievisualbackend.onrender.com";
+const API_URL = "http://localhost:3000";
 
-// Alert Component
 const Alert = ({ type, message }) => {
   const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
   const textColor = type === 'error' ? 'text-red-800' : 'text-green-800';
@@ -31,7 +30,6 @@ const Alert = ({ type, message }) => {
   );
 };
 
-// Default testimonials data
 const defaultTestimonials = [
   {
     id: 1,
@@ -59,7 +57,6 @@ const defaultTestimonials = [
   }
 ];
 
-// TestimonialCard Component
 const TestimonialCard = ({ testimonial, isActive }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.8 }}
@@ -74,7 +71,7 @@ const TestimonialCard = ({ testimonial, isActive }) => (
       stiffness: 100 
     }}
     className="absolute top-0 left-0 w-full"
-    style={{ display: isActive ? 'block' : 'none' }}
+    style={{ display: isActive ? 'block' : 'none' }} // Add this line to prevent overlap
   >
     <div className="rounded-2xl bg-white p-4 md:p-8 shadow-xl">
       <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-6">
@@ -97,7 +94,6 @@ const TestimonialCard = ({ testimonial, isActive }) => (
   </motion.div>
 );
 
-// SocialIcon Component
 const SocialIcon = ({ Icon, href, label }) => (
   <motion.a
     href={href}
@@ -112,7 +108,6 @@ const SocialIcon = ({ Icon, href, label }) => (
   </motion.a>
 );
 
-// FooterSection Component
 const FooterSection = ({ title, children }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -125,7 +120,6 @@ const FooterSection = ({ title, children }) => (
   </motion.div>
 );
 
-// Main Footer Component
 const Footer = ({ testimonials = defaultTestimonials }) => {
   const navigate = useNavigate();
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -134,39 +128,15 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
   const [feedbackStatus, setFeedbackStatus] = useState({ type: '', message: '' });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Authentication check on component mount
   useEffect(() => {
-    const verifyAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        try {
-          const response = await fetch(`${API_URL}/verify-token`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            credentials: 'include'
-          });
-
-          if (response.ok) {
-            setIsAuthenticated(true);
-            console.log('Authentication verified successfully');
-          } else {
-            throw new Error('Token verification failed');
-          }
-        } catch (error) {
-          console.error('Auth verification error:', error);
-          localStorage.removeItem('accessToken');
-          setIsAuthenticated(false);
-        }
-      }
-    };
-
-    verifyAuth();
+    checkAuthStatus();
   }, []);
 
-  // Testimonial rotation effect
+  const checkAuthStatus = () => {
+    const token = localStorage.getItem('accessToken');
+    setIsAuthenticated(!!token);
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -174,7 +144,6 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     return () => clearInterval(timer);
   }, [testimonials]);
 
-  // Clear feedback status after 3 seconds
   useEffect(() => {
     if (feedbackStatus.message) {
       const timer = setTimeout(() => {
@@ -184,14 +153,11 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     }
   }, [feedbackStatus]);
 
-  // Handle login redirect
   const handleLoginClick = (e) => {
     e.preventDefault();
-    const currentPath = window.location.pathname;
-    navigate('/login', { state: { returnUrl: currentPath } });
+    navigate('/login', { state: { returnUrl: window.location.pathname } });
   };
 
-  // Handle feedback submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -213,12 +179,6 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
     try {
       const token = localStorage.getItem('accessToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      console.log('Submitting feedback with token:', token); // Debug log
 
       const response = await fetch(`${API_URL}/feedback`, {
         method: 'POST',
@@ -230,22 +190,16 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         body: JSON.stringify({ content: feedback }),
       });
 
-      console.log('Response status:', response.status); // Debug log
-
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error response:', errorData);
-        
         if (response.status === 401) {
           localStorage.removeItem('accessToken');
           setIsAuthenticated(false);
           throw new Error('Session expired. Please login again.');
         }
-        throw new Error(errorData.message || 'Failed to submit feedback');
+        throw new Error('Failed to submit feedback');
       }
 
       const data = await response.json();
-      console.log('Success response:', data);
 
       setFeedback('');
       setFeedbackStatus({
@@ -253,7 +207,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         message: 'Thank you for your feedback!'
       });
     } catch (error) {
-      console.error('Feedback submission error:', error);
+      console.error('Error submitting feedback:', error);
       setFeedbackStatus({
         type: 'error',
         message: error.message || 'Failed to submit feedback. Please try again later.'
@@ -277,120 +231,139 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-8"
+            className="mb-8 md:mb-12 text-center"
           >
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 mb-4">
-              Welcome to Lockie Visuals!
-            </h1>
-            <p className="text-lg md:text-xl text-gray-600">
-              Your go-to platform for all things creative and visual.
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+              What Our Clients Say
+            </h2>
+            <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-300 mb-2" />
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Section */}
-            <div className="flex flex-col items-center space-y-8">
-              {/* Testimonial Carousel */}
-              <div className="relative w-full h-80">
-                {testimonials.map((testimonial, index) => (
-                  <TestimonialCard
-                    key={testimonial.id}
-                    testimonial={testimonial}
-                    isActive={currentTestimonial === index}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Right Section */}
-            <div className="flex flex-col items-center space-y-4">
-              {/* Feedback Form */}
-              <motion.form
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                onSubmit={handleSubmit}
-                className="w-full max-w-lg p-4 md:p-8 rounded-lg bg-gray-50 shadow-md"
-              >
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Share Your Feedback</h2>
-                <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
-                <textarea
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 resize-none"
-                  rows={4}
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Your feedback here..."
-                />
-                <button
-                  type="submit"
-                  className="mt-4 w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-                </button>
-              </motion.form>
-            </div>
+          <div className="relative h-[400px] md:h-[300px] mb-8">
+            {testimonials.map((testimonial, index) => (
+              <TestimonialCard
+                key={testimonial.id}
+                testimonial={testimonial}
+                isActive={currentTestimonial === index}
+              />
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-blue-800 text-gray-100 py-10 px-4">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <FooterSection title="About Us">
-              <img
+      <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-12 md:py-16 mt-auto">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+            <FooterSection>
+              <motion.img
                 src={LogoImage}
-                alt="Company Logo"
-                className="h-20 w-30 object-contain mb-4"
+                alt="Lockie Visuals Logo"
+                className="h-12 w-auto mb-6 filter brightness-0 invert"
+                whileHover={{ scale: 1.05 }}
               />
-              <p className="text-sm">
-                Lockie Visuals is your ultimate solution for creative visuals. Let's turn your ideas into stunning graphics!
-              </p>
-            </FooterSection>
-            <FooterSection title="Quick Links">
-              <ul className="space-y-2">
-                <li><Link to="/" className="hover:underline">Home</Link></li>
-                <li><Link to="/about" className="hover:underline">About</Link></li>
-                <li><Link to="/services" className="hover:underline">Services</Link></li>
-                <li><Link to="/contact" className="hover:underline">Contact</Link></li>
-              </ul>
-            </FooterSection>
-            <FooterSection title="Follow Us">
-              <div className="flex space-x-4">
-                <SocialIcon Icon={Facebook} href="https://facebook.com" label="Facebook" />
-                <SocialIcon Icon={Twitter} href="https://twitter.com" label="Twitter" />
-                <SocialIcon Icon={Instagram} href="https://instagram.com" label="Instagram" />
-                <SocialIcon Icon={MessageCircle} href="https://tiktok.com" label="MessageCircle" />
-                <SocialIcon Icon={Video} href="https://youtube.com" label="Video" />
-                <SocialIcon Icon={Mail} href="mailto:lockievisual@gmail.com" label="Mail" />
+              <div className="flex flex-wrap gap-4">
+                <SocialIcon Icon={Instagram} href="https://instagram.com/lockievisuals" label="Instagram" />
+                <SocialIcon Icon={Facebook} href="https://facebook.com/lockievisuals" label="Facebook" />
+                <SocialIcon Icon={MessageCircle} href="https://wa.me/265990155300" label="WhatsApp" />
+                <SocialIcon Icon={Video} href="https://tiktok.com/@lockievisuals" label="TikTok" />
+                <SocialIcon Icon={Mail} href="mailto:kidloc24chikapa@gmail.com" label="Email" />
               </div>
             </FooterSection>
-            <FooterSection title="Feedback Form">
-              <motion.form
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                onSubmit={handleSubmit}
-              >
-                <textarea
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 resize-none"
-                  rows={4}
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Your feedback here..."
-                />
-                <button
-                  type="submit"
-                  className="mt-4 w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-                </button>
-              </motion.form>
+
+            <FooterSection title="Quick Links">
+              <motion.ul className="space-y-3">
+                {['About Us', 'Events', 'News'].map((item) => (
+                  <motion.li
+                    key={item}
+                    whileHover={{ x: 5 }}
+                    className="transition-colors duration-300"
+                  >
+                    <Link to={`/${item.toLowerCase().replace(' ')}`} className="hover:text-gray-300">
+                      {item}
+                    </Link>
+                  </motion.li>
+                ))}
+              </motion.ul>
+            </FooterSection>
+
+            <FooterSection title="Services">
+              <motion.ul className="space-y-3">
+                {['Contact', 'Solutions', 'Login', 'signup'].map((item) => (
+                  <motion.li
+                    key={item}
+                    whileHover={{ x: 5 }}
+                    className="transition-colors duration-300"
+                  >
+                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-gray-300">
+                      {item}
+                    </Link>
+                  </motion.li>
+                ))}
+              </motion.ul>
+            </FooterSection>
+
+            <FooterSection title="Contact Info">
+              <motion.div className="space-y-3 text-sm md:text-base">
+                <p>Zomba, UNIMA - Malawi</p>
+                <p>contacts : +265 (0) 990 155 300</p>
+                <p>+265 (0) 888 777 332</p>
+                <p>Email : Infoatlockievisuals@gmail.com</p>
+              </motion.div>
             </FooterSection>
           </div>
-          <p className="text-center text-sm text-gray-400 mt-8">&copy; {new Date().getFullYear()} Lockie Visuals. All rights reserved.</p>
+
+          <motion.form
+            onSubmit={handleSubmit}
+            className="mt-12 max-w-2xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+              <input
+                type="text"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder={isAuthenticated ? "Share your thoughts with us" : "Please login to share feedback"}
+                className="flex-grow p-3 rounded-lg text-black focus:ring-2 focus:ring-gray-500 outline-none"
+                disabled={isSubmitting || !isAuthenticated}
+              />
+              {isAuthenticated ? (
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`bg-gray-700 text-white px-8 py-3 rounded-lg transition-colors duration-300 ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
+                  }`}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
+                </motion.button>
+              ) : (
+                <motion.button
+                  type="button"
+                  onClick={handleLoginClick}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-gray-700 text-white px-8 py-3 rounded-lg hover:bg-gray-600 transition-colors duration-300"
+                >
+                  Login to Submit
+                </motion.button>
+              )}
+            </div>
+          </motion.form>
+
+          <motion.div
+            className="mt-12 text-center text-gray-400 text-sm md:text-base"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <p>&copy; {new Date().getFullYear()} Lockie Visuals. All Rights Reserved.</p>
+          </motion.div>
         </div>
       </footer>
     </div>
