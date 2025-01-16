@@ -7,7 +7,7 @@ import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
 import Pasco from '../asserts/Pasco.png'
 
-const API_URL = "https://lockievisualdb.onrender.com";
+const API_URL = "http://localhost:3000";
 
 const Alert = ({ type, message }) => {
   const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
@@ -50,7 +50,7 @@ const defaultTestimonials = [
   {
     id: 3,
     image: yusuf,
-    name: "Mike Johnson",
+    name: "Philemon Mwanganya",
     heading: "Amazing Event Coverage",
     text: "They captured every special moment of our wedding perfectly. The photos and videos are absolutely beautiful!",
     company: "Happy Client"

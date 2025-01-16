@@ -1,9 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Clock, Send } from 'lucide-react';
 
 export default function ContactUs() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('http://localhost:3000/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setNotification({
+          type: 'success',
+          title: 'Message sent successfully!',
+          message: "We'll get back to you as soon as possible."
+        });
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      setNotification({
+        type: 'error',
+        title: 'Error sending message',
+        message: 'Please try again later.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 ">
+    <div className="min-h-screen bg-gray-100 text-gray-900 relative">
+      {/* Toast Notification */}
+      {notification && (
+        <div 
+          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg max-w-md z-50 ${
+            notification.type === 'success' ? 'bg-green-100 border-l-4 border-green-500' : 'bg-red-100 border-l-4 border-red-500'
+          }`}
+        >
+          <h3 className={`font-medium ${notification.type === 'success' ? 'text-green-800' : 'text-red-800'}`}>
+            {notification.title}
+          </h3>
+          <p className={notification.type === 'success' ? 'text-green-700' : 'text-red-700'}>
+            {notification.message}
+          </p>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="px-6 py-24">
         <div className="max-w-6xl mx-auto">
@@ -49,7 +130,7 @@ export default function ContactUs() {
             {/* Contact Form */}
             <div className="lg:col-span-2">
               <h2 className="text-2xl font-bold mb-8">Send Us a Message</h2>
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -58,6 +139,9 @@ export default function ContactUs() {
                     <input
                       type="text"
                       id="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
                       placeholder="Your name"
                     />
@@ -69,6 +153,9 @@ export default function ContactUs() {
                     <input
                       type="email"
                       id="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
                       placeholder="your@email.com"
                     />
@@ -82,6 +169,9 @@ export default function ContactUs() {
                   <input
                     type="text"
                     id="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
                     placeholder="How can we help?"
                   />
@@ -93,6 +183,9 @@ export default function ContactUs() {
                   </label>
                   <textarea
                     id="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
                     rows={6}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none"
                     placeholder="Your message..."
@@ -101,9 +194,10 @@ export default function ContactUs() {
 
                 <button
                   type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg flex items-center gap-2 transition-colors"
+                  disabled={isSubmitting}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                   <Send className="w-5 h-5" />
                 </button>
               </form>
@@ -127,4 +221,4 @@ const ContactInfo = ({ icon, title, detail }) => {
       </div>
     </div>
   );
-}
+};

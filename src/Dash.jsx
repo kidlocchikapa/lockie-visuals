@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ServiceBookingDashboard = () => {
   const [activeTab, setActiveTab] = useState('services');
   const [bookings, setBookings] = useState([]);
   const [notification, setNotification] = useState('');
   const [confirmingService, setConfirmingService] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  
+  const BOOKINGS_API = 'http://localhost:3000/bookings';
 
   const services = [
     {
@@ -21,58 +26,152 @@ const ServiceBookingDashboard = () => {
     },
   ];
 
-  const handleBookService = (service) => {
-    // Show confirmation modal with the selected service
-    setConfirmingService(service);
+  // Helper function to get auth headers and verify token
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': token
+    };
   };
 
-  const confirmBooking = async () => {
-    if (confirmingService) {
-      const newBooking = {
-        id: bookings.length + 1,
-        service: confirmingService.name,
-        date: new Date().toISOString().split('T')[0], // Today's date
-        status: 'Pending',
-      };
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login', { state: { returnUrl: window.location.pathname } });
+    }
+  }, [navigate]);
 
-      // Save booking locally
-      setBookings((prevBookings) => [...prevBookings, newBooking]);
-      setNotification(`Successfully booked "${confirmingService.name}"!`);
-
-      // Send booking details to the NestJS API
+  useEffect(() => {
+    const fetchBookings = async () => {
       try {
-        const response = await fetch('https://lockievisualdb.onrender.com', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            serviceName: confirmingService.name,
-            userEmail: 'testuser@example.com', // Replace with actual user's email
-          }),
+        const headers = getAuthHeaders();
+        const response = await fetch(BOOKINGS_API, {
+          headers: headers
         });
-
+        
         if (!response.ok) {
-          throw new Error('Failed to send booking to the server');
+          if (response.status === 401) {
+            // Token expired or invalid
+            localStorage.removeItem('token');
+            navigate('/login', { state: { returnUrl: window.location.pathname } });
+            return;
+          }
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch bookings');
         }
-
-        console.log('Booking notification sent successfully!');
+        
+        const data = await response.json();
+        setBookings(data);
       } catch (error) {
-        console.error('Error sending booking:', error);
+        console.error('Error fetching bookings:', error);
+        showNotification(error.message, true);
       }
+    };
 
-      // Clear confirmation modal
-      setConfirmingService(null);
+    if (activeTab === 'bookings') {
+      fetchBookings();
+    }
+  }, [activeTab, navigate]);
 
-      // Clear notification after 2 seconds
-      setTimeout(() => {
-        setNotification('');
-      }, 2000);
+  const handleBookService = async (service) => {
+    try {
+      // Verify token exists before allowing booking
+      getAuthHeaders();
+      setConfirmingService(service);
+    } catch (error) {
+      navigate('/login', { state: { returnUrl: window.location.pathname } });
     }
   };
 
-  const cancelBooking = () => {
-    setConfirmingService(null);
+  const showNotification = (message, isError = false) => {
+    setNotification(message);
+    setTimeout(() => setNotification(''), 3000);
+  };
+
+  const confirmBooking = async () => {
+    if (!confirmingService) return;
+
+    setLoading(true);
+    try {
+      const requestPayload = {
+        serviceName: confirmingService.name,
+        additionalDetails: {
+          price: confirmingService.price,
+          description: confirmingService.description,
+        }
+      };
+
+      const headers = getAuthHeaders();
+      const response = await fetch(BOOKINGS_API, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(requestPayload)
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login', { state: { returnUrl: window.location.pathname } });
+          return;
+        }
+        throw new Error(responseData.message || 'Failed to create booking');
+      }
+
+      setBookings(prev => [...prev, responseData]);
+      showNotification(`Successfully booked "${confirmingService.name}"!`);
+      setConfirmingService(null);
+    } catch (error) {
+      console.error('Booking error:', error);
+      showNotification(error.message, true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelBooking = async (bookingId) => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await fetch(`${BOOKINGS_API}/${bookingId}/cancel`, {
+        method: 'PATCH',
+        headers: headers
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login', { state: { returnUrl: window.location.pathname } });
+          return;
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to cancel booking');
+      }
+
+      const updatedBooking = await response.json();
+      setBookings(prev => prev.map(booking => 
+        booking.id === updatedBooking.id ? updatedBooking : booking
+      ));
+      showNotification('Booking cancelled successfully');
+    } catch (error) {
+      console.error('Cancel booking error:', error);
+      showNotification(error.message, true);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const statusColors = {
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      CONFIRMED: 'bg-blue-100 text-blue-800',
+      DELIVERED: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800'
+    };
+    return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
 
   return (
@@ -83,14 +182,16 @@ const ServiceBookingDashboard = () => {
           <span className="text-gray-600">{new Date().toLocaleDateString()}</span>
         </div>
 
-        {/* Notification */}
         {notification && (
-          <div className="mb-4 p-4 bg-green-100 border border-green-200 text-green-800 rounded shadow-sm">
+          <div className={`mb-4 p-4 rounded shadow-sm ${
+            notification.includes('Failed') || notification.includes('failed')
+              ? 'bg-red-100 border border-red-200 text-red-800'
+              : 'bg-green-100 border border-green-200 text-green-800'
+          }`}>
             {notification}
           </div>
         )}
 
-        {/* Confirmation Modal */}
         {confirmingService && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
@@ -101,22 +202,23 @@ const ServiceBookingDashboard = () => {
               <div className="flex justify-end gap-4">
                 <button
                   className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                  onClick={cancelBooking}
+                  onClick={() => setConfirmingService(null)}
+                  disabled={loading}
                 >
                   Cancel
                 </button>
                 <button
-                  className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+                  className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-50"
                   onClick={confirmBooking}
+                  disabled={loading}
                 >
-                  Confirm
+                  {loading ? 'Processing...' : 'Confirm'}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tabs */}
         <div className="mb-6">
           <div className="flex gap-4 border-b">
             <button
@@ -142,7 +244,6 @@ const ServiceBookingDashboard = () => {
           </div>
         </div>
 
-        {/* Content */}
         {activeTab === 'services' ? (
           <div className="grid md:grid-cols-2 gap-6">
             {services.map((service) => (
@@ -173,18 +274,24 @@ const ServiceBookingDashboard = () => {
                       className="flex items-center justify-between p-4 border rounded-lg"
                     >
                       <div>
-                        <h3 className="font-medium">{booking.service}</h3>
-                        <p className="text-sm text-gray-500">{booking.date}</p>
+                        <h3 className="font-medium">{booking.serviceName}</h3>
+                        <p className="text-sm text-gray-500">
+                          {new Date(booking.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          booking.status === 'Completed'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
-                      >
-                        {booking.status}
-                      </span>
+                      <div className="flex items-center gap-4">
+                        <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(booking.status)}`}>
+                          {booking.status}
+                        </span>
+                        {booking.status === 'PENDING' && (
+                          <button
+                            onClick={() => cancelBooking(booking.id)}
+                            className="text-sm text-red-600 hover:text-red-800"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

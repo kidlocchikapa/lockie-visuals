@@ -26,7 +26,12 @@ function Login() {
   const location = useLocation();
   const returnUrl = location.state?.returnUrl;
 
-  const API_URL = "https://lockievisualdb.onrender.com";
+  const API_URL = "http://localhost:3000";
+
+  useEffect(() => {
+    // Clear any existing tokens on component mount
+    localStorage.removeItem('token');
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -70,7 +75,13 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("accessToken", data.access_token);
+        // Store token with Bearer prefix
+        const token = data.access_token.startsWith('Bearer ') 
+          ? data.access_token 
+          : `Bearer ${data.access_token}`;
+        
+        localStorage.setItem("token", token);
+        
         setSuccess(
           returnUrl
             ? "Login successful! Returning to previous page..."
@@ -81,6 +92,7 @@ function Login() {
       }
     } catch (error) {
       setError("Network error. Please try again later.");
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +107,7 @@ function Login() {
           </h2>
           {returnUrl ? (
             <p className="mt-2 text-center text-sm text-gray-600">
-              Please login to submit your feedback
+              Please login to continue
             </p>
           ) : (
             <p className="mt-2 text-center text-sm text-gray-600">
@@ -114,67 +126,43 @@ function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label
-                className="block text-sm font-medium text-gray-700"
-                htmlFor="email"
-              >
+              <label className="block text-sm font-medium text-gray-700" htmlFor="email">
                 Email
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <img
-                    src="email.png"
-                    alt="Email icon"
-                    className="h-5 w-5 text-gray-400"
-                  />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div>
-              <label
-                className="block text-sm font-medium text-gray-700"
-                htmlFor="password"
-              >
+              <label className="block text-sm font-medium text-gray-700" htmlFor="password">
                 Password
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <img
-                    src="padlock.png"
-                    alt="Password icon"
-                    className="h-5 w-5 text-gray-400"
-                  />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <Link
-                to="/"
+                to="/forgot-password"
                 className="font-medium text-orange-500 hover:text-orange-600"
               >
                 Forgot your password?
