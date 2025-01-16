@@ -11,6 +11,10 @@ export default function ContactUs() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
 
+  const API_URL = process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:3000'
+    : 'https://lockievisualbackend.onrender.com';
+
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
@@ -33,13 +37,16 @@ export default function ContactUs() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('https://lockievisualbackend.onrender.com/contact', {
+      const response = await fetch(`${API_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(formData),
       });
+
+      const data = await response.json();
 
       if (response.ok) {
         setNotification({
@@ -54,13 +61,14 @@ export default function ContactUs() {
           message: ''
         });
       } else {
-        throw new Error('Failed to send message');
+        throw new Error(data.message || 'Failed to send message');
       }
     } catch (error) {
+      console.error('Contact form error:', error);
       setNotification({
         type: 'error',
         title: 'Error sending message',
-        message: 'Please try again later.'
+        message: error.message || 'Please try again later.'
       });
     } finally {
       setIsSubmitting(false);
