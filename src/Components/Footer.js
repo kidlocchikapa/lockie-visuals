@@ -7,7 +7,7 @@ import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
 import Pasco from '../asserts/Pasco.png'
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://lockievisualbackend.onrender.com";
 
 const Alert = ({ type, message }) => {
   const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
