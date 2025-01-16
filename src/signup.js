@@ -74,7 +74,7 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://lockievisualbackend.onrender.com/signup', {
+      const response = await fetch('https://lockievisualbackend.onrender.com', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
