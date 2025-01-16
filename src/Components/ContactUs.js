@@ -33,7 +33,7 @@ export default function ContactUs() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('https://lockievisualbackend.onrender.com', {
+      const response = await fetch('https://lockievisualbackend.onrender.com/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

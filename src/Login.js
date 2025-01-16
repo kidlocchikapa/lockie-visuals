@@ -26,7 +26,7 @@ function Login() {
   const location = useLocation();
   const returnUrl = location.state?.returnUrl;
 
-  const API_URL = "https://lockievisualbackend.onrender.com";
+  const API_URL = "https://lockievisualbackend.onrender.com/signup";
 
   useEffect(() => {
     // Clear any existing tokens on component mount
