@@ -160,12 +160,12 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!isAuthenticated) {
       handleLoginClick(e);
       return;
     }
-
+  
     if (!feedback.trim()) {
       setFeedbackStatus({
         type: 'error',
@@ -173,15 +173,20 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
       });
       return;
     }
-
+  
     setIsSubmitting(true);
     setFeedbackStatus({ type: '', message: '' });
-
+  
     try {
       // Retrieve the token from localStorage and remove the 'Bearer ' prefix if present
       const token = localStorage.getItem('accessToken');
-      const cleanToken = token ? token.split(' ')[1] : ''; // Get the token part after 'Bearer'
-
+      let cleanToken = '';
+  
+      // If the token is in the format "Bearer <token>", extract just the token
+      if (token && token.startsWith('Bearer ')) {
+        cleanToken = token.split(' ')[1]; // Get the token part after 'Bearer'
+      }
+  
       if (!cleanToken) {
         setFeedbackStatus({
           type: 'error',
@@ -189,7 +194,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         });
         return;
       }
-
+  
       // Sending the feedback request to the server with the Authorization header
       const response = await fetch(`${API_URL}/feedback`, {
         method: 'POST',
@@ -200,7 +205,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         credentials: 'include',
         body: JSON.stringify({ content: feedback }),
       });
-
+  
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('accessToken');
@@ -209,9 +214,9 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         }
         throw new Error('Failed to submit feedback');
       }
-
+  
       const data = await response.json();
-
+  
       setFeedback('');
       setFeedbackStatus({
         type: 'success',
@@ -223,7 +228,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         type: 'error',
         message: error.message || 'Failed to submit feedback. Please try again later.',
       });
-
+  
       if (error.message.includes('Session expired')) {
         setTimeout(() => {
           navigate('/login', { state: { returnUrl: window.location.pathname } });
@@ -233,6 +238,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
     <div className="flex flex-col min-h-screen">
