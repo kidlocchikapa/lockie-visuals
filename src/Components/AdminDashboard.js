@@ -1,6 +1,6 @@
 // src/components/admin/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import adminApi from '../../services/api.service';
+import adminApi from './api.services';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('bookings');

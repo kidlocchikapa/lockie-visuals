@@ -7,7 +7,7 @@ import TeamSection from './Components/TeamSection';
 import Footer from './Components/Footer';
 import Maintainance from './Maintainance';
 import ServiceBookingDashboard from './Dash';
-import AdminDashboard from './components/admin/AdminDashboard';
+import AdminDashboard from './Components/AdminDashboard';
 import Login from './Login';
 import Signup from './signup';
 import PortfolioSections from './Components/Port';
