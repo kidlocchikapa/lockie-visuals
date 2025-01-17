@@ -7,6 +7,7 @@ import TeamSection from './Components/TeamSection';
 import Footer from './Components/Footer';
 import Maintainance from './Maintainance';
 import ServiceBookingDashboard from './Dash';
+import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './Login';
 import Signup from './signup';
 import PortfolioSections from './Components/Port';
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/about" element={<AboutUs/>} />
           <Route path="/signup" element={<Signup/>} />
           <Route path="/login" element={<Login/>} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path ="/contact" element={<ContactUs/>} />
           <Route path ="/Marketing" element={<Maintainance/>} />
           <Route path ="/web-development" element={<Maintainance/>} />
