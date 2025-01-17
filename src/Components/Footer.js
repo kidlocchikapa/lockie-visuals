@@ -71,7 +71,7 @@ const TestimonialCard = ({ testimonial, isActive }) => (
       stiffness: 100
     }}
     className="absolute top-0 left-0 w-full"
-    style={{ display: isActive ? 'block' : 'none' }} // Add this line to prevent overlap
+    style={{ display: isActive ? 'block' : 'none' }}
   >
     <div className="rounded-2xl bg-white p-4 md:p-8 shadow-xl">
       <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-6">
@@ -120,10 +120,62 @@ const FooterSection = ({ title, children }) => (
   </motion.div>
 );
 
-const Footer = ({ testimonials = defaultTestimonials }) => {
-  const navigate = useNavigate();
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+const FeedbackForm = ({ isAuthenticated, onSubmit, isSubmitting, feedbackStatus }) => {
   const [feedback, setFeedback] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      navigate('/login', { state: { returnUrl: window.location.pathname } });
+      return;
+    }
+    onSubmit(feedback);
+    setFeedback('');
+  };
+
+  return (
+    <motion.form
+      onSubmit={handleSubmit}
+      className="mt-12 w-full max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow-xl"
+    >
+      <h2 className="text-xl text-center mb-4">
+        {isAuthenticated ? "Submit Your Feedback" : "Login to Submit Feedback"}
+      </h2>
+      <textarea
+        value={feedback}
+        onChange={(e) => setFeedback(e.target.value)}
+        rows="4"
+        className="w-full p-3 bg-gray-700 rounded-lg text-white mb-4"
+        placeholder={isAuthenticated ? "Your feedback..." : "Please login to submit feedback"}
+        disabled={!isAuthenticated || isSubmitting}
+      />
+      <div className="text-center">
+        {isAuthenticated ? (
+          <button
+            type="submit"
+            disabled={isSubmitting || !feedback.trim()}
+            className="bg-orange-500 text-white py-2 px-4 rounded-lg disabled:opacity-50 hover:bg-orange-600 transition-colors"
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => navigate('/login', { state: { returnUrl: window.location.pathname } })}
+            className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            Login to Submit
+          </button>
+        )}
+      </div>
+      <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
+    </motion.form>
+  );
+};
+
+const Footer = ({ testimonials = defaultTestimonials }) => {
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackStatus, setFeedbackStatus] = useState({ type: '', message: '' });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -133,7 +185,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
   }, []);
 
   const checkAuthStatus = () => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
   };
 
@@ -144,80 +196,45 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     return () => clearInterval(timer);
   }, [testimonials]);
 
-  useEffect(() => {
-    if (feedbackStatus.message) {
-      const timer = setTimeout(() => {
-        setFeedbackStatus({ type: '', message: '' });
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [feedbackStatus]);
-
-  const handleLoginClick = (e) => {
-    e.preventDefault();
-    navigate('/login', { state: { returnUrl: window.location.pathname } });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    if (!isAuthenticated) {
-      handleLoginClick(e);
-      return;
-    }
-  
-    if (!feedback.trim()) {
+  const handleSubmitFeedback = async (feedbackContent) => {
+    if (!feedbackContent.trim()) {
       setFeedbackStatus({
         type: 'error',
         message: 'Please enter your feedback before submitting'
       });
       return;
     }
-  
+
     setIsSubmitting(true);
     setFeedbackStatus({ type: '', message: '' });
-  
+
     try {
-      // Retrieve the token from localStorage
-      const token = localStorage.getItem('token'); // Changed to 'token' based on your description
-      let cleanToken = '';
-  
-      // If the token is in the format "bearer <token>", extract just the actual token part
-      if (token && token.toLowerCase().startsWith('bearer ')) {
-        cleanToken = token.split(' ')[1]; // Get the token part after 'bearer'
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        throw new Error('No valid token found. Please log in again.');
       }
-  
-      if (!cleanToken) {
-        setFeedbackStatus({
-          type: 'error',
-          message: 'No valid token found. Please log in again.',
-        });
-        return;
-      }
-  
-      // Sending the feedback request to the server with the Authorization header
+
       const response = await fetch(`${API_URL}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cleanToken}`, // Use the cleaned token
+          'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',
-        body: JSON.stringify({ content: feedback }),
+        body: JSON.stringify({ content: feedbackContent }),
       });
-  
+
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem('token'); // Adjusted based on 'token' key
+          localStorage.removeItem('token');
           setIsAuthenticated(false);
           throw new Error('Session expired. Please login again.');
         }
         throw new Error('Failed to submit feedback');
       }
-  
-      const data = await response.json();
-  
-      setFeedback('');
+
+      await response.json();
       setFeedbackStatus({
         type: 'success',
         message: 'Thank you for your feedback!',
@@ -228,18 +245,10 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         type: 'error',
         message: error.message || 'Failed to submit feedback. Please try again later.',
       });
-  
-      if (error.message.includes('Session expired')) {
-        setTimeout(() => {
-          navigate('/login', { state: { returnUrl: window.location.pathname } });
-        }, 2000);
-      }
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -296,7 +305,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                     whileHover={{ x: 5 }}
                     className="transition-colors duration-300"
                   >
-                    <Link to={`/${item.toLowerCase().replace(' ')}`} className="hover:text-gray-300">
+                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-gray-300">
                       {item}
                     </Link>
                   </motion.li>
@@ -330,29 +339,12 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             </FooterSection>
           </div>
 
-          <motion.form
-            onSubmit={handleSubmit}
-            className="mt-12 w-full max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow-xl"
-          >
-            <h2 className="text-xl text-center mb-4">Submit Your Feedback</h2>
-            <textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              rows="4"
-              className="w-full p-3 bg-gray-700 rounded-lg text-white mb-4"
-              placeholder="Your feedback..."
-            />
-            <div className="text-center">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-orange-500 text-white py-2 px-4 rounded-lg disabled:opacity-50"
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-              </button>
-            </div>
-            <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
-          </motion.form>
+          <FeedbackForm
+            isAuthenticated={isAuthenticated}
+            onSubmit={handleSubmitFeedback}
+            isSubmitting={isSubmitting}
+            feedbackStatus={feedbackStatus}
+          />
         </div>
       </footer>
     </div>
