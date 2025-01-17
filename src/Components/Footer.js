@@ -1,34 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide-react';
 import yusuf from './Yusuf.png';
 import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
 import Pasco from '../asserts/Pasco.png';
-
-const API_URL = "https://lockievisualbackend.onrender.com";
-
-const Alert = ({ type, message }) => {
-  const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
-  const textColor = type === 'error' ? 'text-red-800' : 'text-green-800';
-  const borderColor = type === 'error' ? 'border-red-200' : 'border-green-200';
-
-  return (
-    <AnimatePresence>
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4`}
-        >
-          {message}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
 
 const defaultTestimonials = [
   {
@@ -121,18 +98,7 @@ const FooterSection = ({ title, children }) => (
 );
 
 const Footer = ({ testimonials = defaultTestimonials }) => {
-  const navigate = useNavigate();
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [feedback, setFeedback] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedbackStatus, setFeedbackStatus] = useState({ type: '', message: '' });
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    checkAuthStatus();
-    window.addEventListener('storage', checkAuthStatus);
-    return () => window.removeEventListener('storage', checkAuthStatus);
-  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -140,95 +106,6 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     }, 5000);
     return () => clearInterval(timer);
   }, [testimonials]);
-
-  useEffect(() => {
-    if (feedbackStatus.message) {
-      const timer = setTimeout(() => {
-        setFeedbackStatus({ type: '', message: '' });
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [feedbackStatus]);
-
-  const checkAuthStatus = () => {
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!isAuthenticated) {
-      navigate('/login', { state: { returnUrl: window.location.pathname } });
-      return;
-    }
-
-    if (!feedback.trim()) {
-      setFeedbackStatus({
-        type: 'error',
-        message: 'Please enter your feedback before submitting'
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    setFeedbackStatus({ type: '', message: '' });
-
-    try {
-      let token = localStorage.getItem('token');
-      
-      if (!token) {
-        throw new Error('No valid token found. Please log in again.');
-      }
-
-      // Ensure token has Bearer prefix
-      if (!token.toLowerCase().startsWith('bearer ')) {
-        token = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`${API_URL}/feedback`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token,
-        },
-        credentials: 'include',
-        body: JSON.stringify({ content: feedback }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Server response:', errorData);
-
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-          setIsAuthenticated(false);
-          throw new Error('Session expired. Please login again.');
-        }
-        throw new Error(errorData || 'Failed to submit feedback');
-      }
-
-      setFeedback('');
-      setFeedbackStatus({
-        type: 'success',
-        message: 'Thank you for your feedback!',
-      });
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      setFeedbackStatus({
-        type: 'error',
-        message: error.message || 'Failed to submit feedback. Please try again later.',
-      });
-
-      if (error.message.includes('Session expired')) {
-        setTimeout(() => {
-          navigate('/login', { state: { returnUrl: window.location.pathname } });
-        }, 2000);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -318,43 +195,6 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
               </motion.div>
             </FooterSection>
           </div>
-
-          <motion.form
-            onSubmit={handleSubmit}
-            className="mt-12 w-full max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow-xl"
-          >
-            <h2 className="text-xl text-center mb-4">
-              {isAuthenticated ? "Submit Your Feedback" : "Login to Submit Feedback"}
-            </h2>
-            <textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              rows="4"
-              className="w-full p-3 bg-gray-700 rounded-lg text-white mb-4"
-              placeholder={isAuthenticated ? "Your feedback..." : "Please login to submit feedback"}
-              disabled={!isAuthenticated || isSubmitting}
-            />
-            <div className="text-center">
-              {isAuthenticated ? (
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !feedback.trim()}
-                  className="bg-orange-500 text-white py-2 px-4 rounded-lg disabled:opacity-50 hover:bg-orange-600 transition-colors"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => navigate('/login', { state: { returnUrl: window.location.pathname } })}
-                  className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors"
-                >
-                  Login to Submit
-                </button>
-              )}
-            </div>
-            <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
-          </motion.form>
         </div>
       </footer>
     </div>
