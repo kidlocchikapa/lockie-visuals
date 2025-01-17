@@ -178,13 +178,13 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     setFeedbackStatus({ type: '', message: '' });
   
     try {
-      // Retrieve the token from localStorage and remove the 'Bearer ' prefix if present
-      const token = localStorage.getItem('accessToken');
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem('token'); // Changed to 'token' based on your description
       let cleanToken = '';
   
-      // If the token is in the format "Bearer <token>", extract just the token
-      if (token && token.startsWith('Bearer ')) {
-        cleanToken = token.split(' ')[1]; // Get the token part after 'Bearer'
+      // If the token is in the format "bearer <token>", extract just the actual token part
+      if (token && token.toLowerCase().startsWith('bearer ')) {
+        cleanToken = token.split(' ')[1]; // Get the token part after 'bearer'
       }
   
       if (!cleanToken) {
@@ -208,7 +208,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
   
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem('accessToken');
+          localStorage.removeItem('token'); // Adjusted based on 'token' key
           setIsAuthenticated(false);
           throw new Error('Session expired. Please login again.');
         }
@@ -238,6 +238,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
       setIsSubmitting(false);
     }
   };
+  
   
 
   return (
