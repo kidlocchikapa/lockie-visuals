@@ -5,9 +5,9 @@ import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide
 import yusuf from './Yusuf.png';
 import LogoImage from '../asserts/LogoImage.png';
 import kidloc from './lockie.png';
-import Pasco from '../asserts/Pasco.png'
+import Pasco from '../asserts/Pasco.png';
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://lockievisualbackend.onrender.com";
 
 const Alert = ({ type, message }) => {
   const bgColor = type === 'error' ? 'bg-red-100' : 'bg-green-100';
@@ -60,15 +60,15 @@ const defaultTestimonials = [
 const TestimonialCard = ({ testimonial, isActive }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ 
+    animate={{
       opacity: isActive ? 1 : 0,
       scale: isActive ? 1 : 0.8,
       rotateY: isActive ? 0 : 180
     }}
-    transition={{ 
+    transition={{
       duration: 0.8,
       type: "spring",
-      stiffness: 100 
+      stiffness: 100
     }}
     className="absolute top-0 left-0 w-full"
     style={{ display: isActive ? 'block' : 'none' }} // Add this line to prevent overlap
@@ -160,7 +160,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       handleLoginClick(e);
       return;
@@ -178,13 +178,24 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     setFeedbackStatus({ type: '', message: '' });
 
     try {
+      // Retrieve the token from localStorage and remove the 'Bearer ' prefix if present
       const token = localStorage.getItem('accessToken');
+      const cleanToken = token ? token.split(' ')[1] : ''; // Get the token part after 'Bearer'
 
+      if (!cleanToken) {
+        setFeedbackStatus({
+          type: 'error',
+          message: 'No valid token found. Please log in again.',
+        });
+        return;
+      }
+
+      // Sending the feedback request to the server with the Authorization header
       const response = await fetch(`${API_URL}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${cleanToken}`, // Use the cleaned token
         },
         credentials: 'include',
         body: JSON.stringify({ content: feedback }),
@@ -204,15 +215,15 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
       setFeedback('');
       setFeedbackStatus({
         type: 'success',
-        message: 'Thank you for your feedback!'
+        message: 'Thank you for your feedback!',
       });
     } catch (error) {
       console.error('Error submitting feedback:', error);
       setFeedbackStatus({
         type: 'error',
-        message: error.message || 'Failed to submit feedback. Please try again later.'
+        message: error.message || 'Failed to submit feedback. Please try again later.',
       });
-      
+
       if (error.message.includes('Session expired')) {
         setTimeout(() => {
           navigate('/login', { state: { returnUrl: window.location.pathname } });
@@ -314,56 +325,27 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
           <motion.form
             onSubmit={handleSubmit}
-            className="mt-12 max-w-2xl mx-auto"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
+            className="mt-12 w-full max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow-xl"
           >
-            <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input
-                type="text"
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                placeholder={isAuthenticated ? "Share your thoughts with us" : "Please login to share feedback"}
-                className="flex-grow p-3 rounded-lg text-black focus:ring-2 focus:ring-gray-500 outline-none"
-                disabled={isSubmitting || !isAuthenticated}
-              />
-              {isAuthenticated ? (
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`bg-gray-700 text-white px-8 py-3 rounded-lg transition-colors duration-300 ${
-                    isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
-                  }`}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit'}
-                </motion.button>
-              ) : (
-                <motion.button
-                  type="button"
-                  onClick={handleLoginClick}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-gray-700 text-white px-8 py-3 rounded-lg hover:bg-gray-600 transition-colors duration-300"
-                >
-                  Login to Submit
-                </motion.button>
-              )}
+            <h2 className="text-xl text-center mb-4">Submit Your Feedback</h2>
+            <textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              rows="4"
+              className="w-full p-3 bg-gray-700 rounded-lg text-white mb-4"
+              placeholder="Your feedback..."
+            />
+            <div className="text-center">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-orange-500 text-white py-2 px-4 rounded-lg disabled:opacity-50"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+              </button>
             </div>
+            <Alert type={feedbackStatus.type} message={feedbackStatus.message} />
           </motion.form>
-
-          <motion.div
-            className="mt-12 text-center text-gray-400 text-sm md:text-base"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            <p>&copy; {new Date().getFullYear()} Lockie Visuals. All Rights Reserved.</p>
-          </motion.div>
         </div>
       </footer>
     </div>
