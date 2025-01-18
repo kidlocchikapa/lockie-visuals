@@ -6,17 +6,6 @@ import online from '../asserts/Online.jpg';
 import market from '../asserts/Market.jpg';
 import HomeImage from '../asserts/HomeImage.jpg';
 
-
-// Image preloader component remains the same
-const ImagePreloader = ({ src, onLoad }) => {
-  useEffect(() => {
-    const img = new Image();
-    img.src = src;
-    img.onload = onLoad;
-  }, [src, onLoad]);
-  return null;
-};
-
 const carouselData = [
   {
     title: 'Welcome to Lockie Visuals',
@@ -26,7 +15,7 @@ const carouselData = [
       primary: 'Explore Our Work',
       secondary: 'Get Started'
     },
-    path: '/portfolio' // Add path for navigation
+    path: '/portfolio'
   },
   {
     title: 'Enhance Your Online Presence',
@@ -36,7 +25,7 @@ const carouselData = [
       primary: 'View Portfolio',
       secondary: 'Contact Us'
     },
-    path: '/portfolio' // Add path for navigation
+    path: '/portfolio'
   },
   {
     title: 'Cutting-Edge Visual Solutions',
@@ -46,11 +35,10 @@ const carouselData = [
       primary: 'See Demo',
       secondary: 'Learn More'
     },
-    path: '/portfolio' // Add path for navigation
+    path: '/portfolio'
   }
 ];
 
-// Slide variants remain the same
 const slideVariants = {
   enter: (direction) => ({
     x: direction > 0 ? 1000 : -1000,
@@ -84,8 +72,6 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [[page, direction], setPage] = useState([0, 0]);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [loadedImages, setLoadedImages] = useState(new Set());
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const slideIndex = Math.abs(page % carouselData.length);
 
@@ -93,47 +79,19 @@ const HomePage = () => {
     setPage([page + newDirection, newDirection]);
   };
 
-  // Replace scrollToPortfolio with navigateToPortfolio
   const navigateToPortfolio = () => {
     navigate(carouselData[slideIndex].path);
   };
-
-  // Rest of the useEffect hooks remain the same
-  useEffect(() => {
-    carouselData.forEach((slide, index) => {
-      const img = new Image();
-      img.src = slide.image;
-      img.onload = () => {
-        setLoadedImages(prev => new Set([...prev, index]));
-        if (index === 0) setIsInitialLoad(false);
-      };
-    });
-  }, []);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
 
     const slideInterval = setInterval(() => {
-      if (loadedImages.size === carouselData.length) {
-        paginate(1);
-      }
+      paginate(1);
     }, 5000);
 
     return () => clearInterval(slideInterval);
-  }, [isAutoPlaying, page, loadedImages]);
-
-  const LoadingState = () => (
-    <div className="absolute inset-0 flex items-center justify-center bg-black">
-      <div className="space-y-4 text-center">
-        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-white text-lg">Loading visuals...</p>
-      </div>
-    </div>
-  );
-
-  if (isInitialLoad) {
-    return <LoadingState />;
-  }
+  }, [isAutoPlaying, page]);
 
   return (
     <motion.div 
@@ -142,7 +100,6 @@ const HomePage = () => {
       onHoverEnd={() => setIsAutoPlaying(true)}
     >
       <AnimatePresence initial={false} custom={direction}>
-        {/* Rest of the AnimatePresence content remains the same */}
         <motion.div
           key={page}
           custom={direction}
@@ -161,9 +118,7 @@ const HomePage = () => {
             style={{
               backgroundImage: `url(${carouselData[slideIndex].image})`,
               backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              opacity: loadedImages.has(slideIndex) ? 1 : 0,
-              transition: 'opacity 0.3s ease-in-out'
+              backgroundPosition: 'center'
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/50 to-black/80">
@@ -172,11 +127,6 @@ const HomePage = () => {
           </div>
         </motion.div>
       </AnimatePresence>
-
-      <ImagePreloader 
-        src={carouselData[(slideIndex + 1) % carouselData.length].image} 
-        onLoad={() => setLoadedImages(prev => new Set([...prev, (slideIndex + 1) % carouselData.length]))}
-      />
 
       <NavigationButton direction="left" onClick={() => paginate(-1)} />
       <NavigationButton direction="right" onClick={() => paginate(1)} />
@@ -244,7 +194,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Progress Indicators */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
         <div className="flex gap-3">
           {carouselData.map((_, index) => (
@@ -263,7 +212,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Scroll Indicator - You can remove this since we're not scrolling anymore */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

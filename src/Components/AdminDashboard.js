@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, RefreshCw } from 'lucide-react';
-import Alert from '../Components/ui/alert';
+import { RefreshCw } from 'lucide-react';
+import Alert from '../Components/ui/alert'; // Updated import path to your custom Alert component
 import adminApi from './api.services';
 
 const Button = ({ children, variant = 'default', className = '', disabled, onClick }) => {
@@ -20,6 +20,7 @@ const Button = ({ children, variant = 'default', className = '', disabled, onCli
       className={`${baseStyles} ${variants[variant]} ${className}`}
       disabled={disabled}
       onClick={onClick}
+      type="button"
     >
       {children}
     </button>
@@ -32,26 +33,35 @@ const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [alertInfo, setAlertInfo] = useState({ message: '', type: '' });
+  const [alertInfo, setAlertInfo] = useState({ message: '', type: '' }); // Updated to match custom Alert component
+  const [actionLoading, setActionLoading] = useState({});
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
+      setAlertInfo({ message: '', type: '' });
       setIsRefreshing(true);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const [bookingsData, contactsData] = await Promise.all([
         adminApi.getBookings(),
         adminApi.getContacts()
       ]);
+
       setBookings(bookingsData);
       setContacts(contactsData);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
-      setAlertInfo({ 
-        message: error.message || 'Failed to load dashboard data. Please try again.',
-        type: 'error'
-      });
-      if (error.message.includes('401')) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to load dashboard data';
+      setAlertInfo({ message: errorMessage, type: 'error' });
+      
+      if (error.response?.status === 401 || errorMessage.includes('token')) {
+        localStorage.removeItem('token');
         navigate('/login', { state: { from: '/admin' } });
       }
     } finally {
@@ -61,41 +71,42 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login', { state: { from: '/admin' } });
-      return;
-    }
     loadDashboardData();
-  }, [navigate, loadDashboardData]);
+  }, [loadDashboardData]);
 
-  const handleAction = async (actionFn, bookingId, successMessage) => {
+  const handleAction = async (actionFn, bookingId, actionType) => {
+    setActionLoading(prev => ({ ...prev, [bookingId]: true }));
     try {
       const updatedBooking = await actionFn(bookingId);
       setBookings(bookings.map(booking => 
         booking.id === bookingId ? updatedBooking : booking
       ));
-      setAlertInfo({ message: successMessage, type: 'success' });
-    } catch (error) {
-      console.error(`Failed to perform action:`, error);
       setAlertInfo({ 
-        message: error.message || `Failed to ${successMessage.toLowerCase()}. Please try again.`,
-        type: 'error'
+        message: `Successfully ${actionType}`, 
+        type: 'success' 
       });
-      if (error.message.includes('401')) {
+    } catch (error) {
+      console.error(`Failed to ${actionType}:`, error);
+      const errorMessage = error.response?.data?.message || error.message || `Failed to ${actionType}`;
+      setAlertInfo({ message: errorMessage, type: 'error' });
+      
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
         navigate('/login', { state: { from: '/admin' } });
       }
+    } finally {
+      setActionLoading(prev => ({ ...prev, [bookingId]: false }));
     }
   };
 
   const handleConfirmBooking = (bookingId) => 
-    handleAction(adminApi.confirmBooking, bookingId, 'Booking confirmed successfully');
+    handleAction(adminApi.confirmBooking, bookingId, 'confirmed booking');
 
   const handleRejectBooking = (bookingId) => 
-    handleAction(adminApi.rejectBooking, bookingId, 'Booking rejected successfully');
+    handleAction(adminApi.rejectBooking, bookingId, 'rejected booking');
 
   const handleMarkDelivered = (bookingId) => 
-    handleAction(adminApi.markDelivered, bookingId, 'Service marked as delivered successfully');
+    handleAction(adminApi.markDelivered, bookingId, 'marked booking as delivered');
 
   const getStatusBadge = (status) => {
     const statusStyles = {
@@ -106,7 +117,7 @@ const AdminDashboard = () => {
     };
 
     return (
-      <span className={`px-2 py-1 rounded-md text-sm ${statusStyles[status]}`}>
+      <span className={`px-2 py-1 rounded-md text-sm ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
@@ -184,14 +195,16 @@ const AdminDashboard = () => {
                           <Button
                             onClick={() => handleConfirmBooking(booking.id)}
                             variant="success"
+                            disabled={actionLoading[booking.id]}
                           >
-                            Confirm
+                            {actionLoading[booking.id] ? 'Confirming...' : 'Confirm'}
                           </Button>
                           <Button
                             onClick={() => handleRejectBooking(booking.id)}
                             variant="danger"
+                            disabled={actionLoading[booking.id]}
                           >
-                            Reject
+                            {actionLoading[booking.id] ? 'Rejecting...' : 'Reject'}
                           </Button>
                         </div>
                       )}
@@ -200,8 +213,9 @@ const AdminDashboard = () => {
                           onClick={() => handleMarkDelivered(booking.id)}
                           variant="info"
                           className="mt-4"
+                          disabled={actionLoading[booking.id]}
                         >
-                          Mark Delivered
+                          {actionLoading[booking.id] ? 'Marking...' : 'Mark Delivered'}
                         </Button>
                       )}
                     </div>
