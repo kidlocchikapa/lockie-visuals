@@ -1,83 +1,165 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useNavigate,Link } from 'react-router-dom';
 
-const API_URL = 'https://lockievisualbackend.onrender.com';
+const API_URL = 'https://lockievisualbackend.onrender.com/auth';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Clear any existing tokens on component mount
+    localStorage.removeItem('token');
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess('');
+        navigate('/admin/dashboard');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!email || !password) {
+      setError('Please fill in all fields.');
+      return;
+    }
 
     try {
-      const response = await axios.post(`${API_URL}/admin/login`, {
-        email,
-        password
+      setIsLoading(true);
+      setError('');
+      setSuccess('');
+
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
 
-      const { token } = response.data;
-      localStorage.setItem('adminToken', token);
-      window.location.href = '/admin/dashboard';
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store token with Bearer prefix
+        const token = data.access_token.startsWith('Bearer ') 
+          ? data.access_token 
+          : `Bearer ${data.access_token}`;
+        
+        localStorage.setItem('token', token);
+
+        setSuccess('Login successful! Redirecting to admin dashboard...');
+      } else {
+        setError(data.message || 'Invalid credentials. Please try again.');
+      }
     } catch (error) {
-      setError(error.response?.data?.message || 'Login failed');
+      setError('Network error. Please try again later.');
+      console.error('Login error:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-md">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Admin Login
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          {error && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-md">
-              {error}
-            </div>
-          )}
+        {error && <Alert type="error" message={error} />}
+        {success && <Alert type="success" message={success} />}
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
+              <label className="block text-sm font-medium text-gray-700" htmlFor="email">
+                Email
+              </label>
               <input
+                id="email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 required
+                className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700" htmlFor="password">
+                Password
+              </label>
               <input
+                id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 required
+                className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
               />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <Link
+                to="/forgot-password"
+                className="font-medium text-orange-500 hover:text-orange-600"
+              >
+                Forgot your password?
+              </Link>
             </div>
           </div>
 
           <div>
             <button
               type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              disabled={isLoading}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </div>
         </form>
       </div>
+    </div>
+  );
+};
+
+const Alert = ({ type, message }) => {
+  const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
+  const textColor = type === "error" ? "text-red-800" : "text-green-800";
+  const borderColor = type === "error" ? "border-red-200" : "border-green-200";
+
+  return (
+    <div
+      className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4 shadow-md animate-fade-in-down`}
+    >
+      {message}
     </div>
   );
 };
