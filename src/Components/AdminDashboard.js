@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
-import Alert from '../Components/ui/alert'; // Updated import path to your custom Alert component
+import Alert from '../Components/ui/alert';
 import adminApi from './api.services';
 
 const Button = ({ children, variant = 'default', className = '', disabled, onClick }) => {
@@ -33,20 +33,26 @@ const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [alertInfo, setAlertInfo] = useState({ message: '', type: '' }); // Updated to match custom Alert component
+  const [alertInfo, setAlertInfo] = useState({ message: '', type: '' });
   const [actionLoading, setActionLoading] = useState({});
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const checkAuthentication = useCallback(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login', { state: { from: '/admin' } });
+      return false;
+    }
+    return true;
+  }, [navigate]);
+
   const loadDashboardData = useCallback(async () => {
+    if (!checkAuthentication()) return;
+
     try {
       setLoading(true);
       setAlertInfo({ message: '', type: '' });
       setIsRefreshing(true);
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
 
       const [bookingsData, contactsData] = await Promise.all([
         adminApi.getBookings(),
@@ -59,22 +65,21 @@ const AdminDashboard = () => {
       console.error('Failed to load dashboard data:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to load dashboard data';
       setAlertInfo({ message: errorMessage, type: 'error' });
-      
-      if (error.response?.status === 401 || errorMessage.includes('token')) {
-        localStorage.removeItem('token');
-        navigate('/login', { state: { from: '/admin' } });
-      }
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [navigate]);
+  }, [checkAuthentication]);
 
   useEffect(() => {
-    loadDashboardData();
-  }, [loadDashboardData]);
+    if (checkAuthentication()) {
+      loadDashboardData();
+    }
+  }, [loadDashboardData, checkAuthentication]);
 
   const handleAction = async (actionFn, bookingId, actionType) => {
+    if (!checkAuthentication()) return;
+
     setActionLoading(prev => ({ ...prev, [bookingId]: true }));
     try {
       const updatedBooking = await actionFn(bookingId);
@@ -89,11 +94,6 @@ const AdminDashboard = () => {
       console.error(`Failed to ${actionType}:`, error);
       const errorMessage = error.response?.data?.message || error.message || `Failed to ${actionType}`;
       setAlertInfo({ message: errorMessage, type: 'error' });
-      
-      if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        navigate('/login', { state: { from: '/admin' } });
-      }
     } finally {
       setActionLoading(prev => ({ ...prev, [bookingId]: false }));
     }
