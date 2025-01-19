@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './Components/Head';
 import EmailVerification from './Components/EmailVerification';
+import AdminLogin from './Components/Adminlogin';
 
 // Lazy load components
 const HomePage = lazy(() => import('./Components/HomePage'));
@@ -59,6 +60,7 @@ const App = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/verify-email" element={<EmailVerification />} />
             <Route path="/admin/bookings/confirm/:id" element={<AdminDashboard />} />
