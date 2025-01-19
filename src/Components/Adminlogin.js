@@ -30,7 +30,7 @@ const AdminLogin = () => {
     if (success) {
       const timer = setTimeout(() => {
         setSuccess('');
-        navigate('/admin/dashboard');
+        navigate('/admin');
       }, 2000);
       return () => clearTimeout(timer);
     }
