@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import Alert from '../Components/ui/alert';
-import adminApi from './api.services';
+import axios from 'axios';
+
+const API_URL = 'https://lockievisualbackend.onrender.com';
+
+const apiClient = axios.create({
+  baseURL: API_URL,
+  timeout: 10000,
+});
 
 const Button = ({ children, variant = 'default', className = '', disabled, onClick }) => {
   const baseStyles = "px-4 py-2 rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -28,7 +34,6 @@ const Button = ({ children, variant = 'default', className = '', disabled, onCli
 };
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('bookings');
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -37,18 +42,35 @@ const AdminDashboard = () => {
   const [actionLoading, setActionLoading] = useState({});
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const checkAuthentication = useCallback(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login', { state: { from: '/admin' } });
-      return false;
+  // API Functions
+  const adminApi = {
+    async getBookings() {
+      const response = await apiClient.get('/admin/bookings');
+      return response.data;
+    },
+
+    async getContacts() {
+      const response = await apiClient.get('/admin/contacts');
+      return response.data;
+    },
+
+    async confirmBooking(bookingId) {
+      const response = await apiClient.post(`/admin/bookings/${bookingId}/confirm`);
+      return response.data;
+    },
+
+    async rejectBooking(bookingId) {
+      const response = await apiClient.post(`/admin/bookings/${bookingId}/reject`);
+      return response.data;
+    },
+
+    async markDelivered(bookingId) {
+      const response = await apiClient.post(`/admin/bookings/${bookingId}/deliver`);
+      return response.data;
     }
-    return true;
-  }, [navigate]);
+  };
 
   const loadDashboardData = useCallback(async () => {
-    if (!checkAuthentication()) return;
-
     try {
       setLoading(true);
       setAlertInfo({ message: '', type: '' });
@@ -63,23 +85,21 @@ const AdminDashboard = () => {
       setContacts(contactsData);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to load dashboard data';
-      setAlertInfo({ message: errorMessage, type: 'error' });
+      setAlertInfo({ 
+        message: error.response?.data?.message || 'Failed to load dashboard data', 
+        type: 'error' 
+      });
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [checkAuthentication]);
+  }, []);
 
   useEffect(() => {
-    if (checkAuthentication()) {
-      loadDashboardData();
-    }
-  }, [loadDashboardData, checkAuthentication]);
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   const handleAction = async (actionFn, bookingId, actionType) => {
-    if (!checkAuthentication()) return;
-
     setActionLoading(prev => ({ ...prev, [bookingId]: true }));
     try {
       const updatedBooking = await actionFn(bookingId);
@@ -90,10 +110,14 @@ const AdminDashboard = () => {
         message: `Successfully ${actionType}`, 
         type: 'success' 
       });
+      // Refresh the data after successful action
+      loadDashboardData();
     } catch (error) {
       console.error(`Failed to ${actionType}:`, error);
-      const errorMessage = error.response?.data?.message || error.message || `Failed to ${actionType}`;
-      setAlertInfo({ message: errorMessage, type: 'error' });
+      setAlertInfo({ 
+        message: error.response?.data?.message || `Failed to ${actionType}`, 
+        type: 'error' 
+      });
     } finally {
       setActionLoading(prev => ({ ...prev, [bookingId]: false }));
     }
