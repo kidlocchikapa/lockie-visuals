@@ -15,11 +15,15 @@ const AdminLogin = () => {
 
   // Effect to check for token on mount (if already logged in)
   useEffect(() => {
-    if (adminToken) {
-      console.log("Token found in localStorage:", adminToken);
+    // Check if there's an admin token in localStorage
+    const storedToken = localStorage.getItem("adminToken");
+
+    if (storedToken) {
+      console.log("Token found in localStorage:", storedToken);
+      setAdminToken(storedToken); // Update state with the stored token
       navigate("/admin/dashboard"); // Redirect if already logged in
     }
-  }, [adminToken, navigate]);
+  }, [navigate]);
 
   // Effect for handling successful login and redirecting
   useEffect(() => {
