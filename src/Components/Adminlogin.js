@@ -26,7 +26,7 @@ const AdminLogin = () => {
     if (success) {
       const timer = setTimeout(() => {
         navigate("/admin/dashboard");
-      }, 2000);
+      }, 2000); // Delay the redirect for 2 seconds to show success message
       return () => clearTimeout(timer);
     }
   }, [success, navigate]);
