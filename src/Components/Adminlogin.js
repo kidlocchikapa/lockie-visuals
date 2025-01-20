@@ -1,36 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate,Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
-const API_URL = 'https://lockievisualbackend.onrender.com/auth';
+const API_URL = "https://lockievisualbackend.onrender.com/auth";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
+  // Clear token only if explicitly required (e.g., logout)
   useEffect(() => {
-    // Clear any existing tokens on component mount
-    localStorage.removeItem('token');
+    console.log("AdminLogin component mounted");
   }, []);
 
+  // Automatically clear error messages after 2 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
-        setError('');
+        setError("");
       }, 2000);
       return () => clearTimeout(timer);
     }
   }, [error]);
 
+  // Redirect after successful login
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        setSuccess('');
-        navigate('/admin/dashboard');
+        navigate("/admin/dashboard");
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -40,39 +41,39 @@ const AdminLogin = () => {
     event.preventDefault();
 
     if (!email || !password) {
-      setError('Please fill in all fields.');
+      setError("Please fill in all fields.");
       return;
     }
 
     try {
       setIsLoading(true);
-      setError('');
-      setSuccess('');
+      setError("");
+      setSuccess("");
 
       const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: 'include',
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Store token with Bearer prefix
-        const token = data.access_token.startsWith('Bearer ') 
-          ? data.access_token 
+        const token = data.access_token.startsWith("Bearer ")
+          ? data.access_token
           : `Bearer ${data.access_token}`;
-        
-        localStorage.setItem('token', token);
 
-        setSuccess('Login successful! Redirecting to admin dashboard...');
+        // Store the token persistently in localStorage
+        localStorage.setItem("token", token);
+        console.log("Token stored:", token);
+
+        setSuccess("Login successful! Redirecting to admin dashboard...");
       } else {
-        setError(data.message || 'Invalid credentials. Please try again.');
+        setError(data.message || "Invalid credentials. Please try again.");
       }
     } catch (error) {
-      setError('Network error. Please try again later.');
-      console.error('Login error:', error);
+      setError("Network error. Please try again later.");
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +92,10 @@ const AdminLogin = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="email">
+              <label
+                className="block text-sm font-medium text-gray-700"
+                htmlFor="email"
+              >
                 Email
               </label>
               <input
@@ -107,7 +111,10 @@ const AdminLogin = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="password">
+              <label
+                className="block text-sm font-medium text-gray-700"
+                htmlFor="password"
+              >
                 Password
               </label>
               <input
