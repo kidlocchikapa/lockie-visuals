@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import Alert from '../Components/ui/alert';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API_URL = 'https://lockievisualbackend.onrender.com';
@@ -9,13 +8,14 @@ const API_URL = 'https://lockievisualbackend.onrender.com';
 const apiClient = axios.create({
   baseURL: API_URL,
   timeout: 10000,
+  withCredentials: true
 });
 
 // Add auth token to requests
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('adminToken');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = token; // No need to add Bearer prefix as it's already included
   }
   return config;
 });
@@ -23,18 +23,17 @@ apiClient.interceptors.request.use((config) => {
 // Handle response errors globally
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      // Clear token and redirect to login
       localStorage.removeItem('adminToken');
-      window.location.href = '/admin/login'; // Redirect to login if 401
+      window.location.href = '/admin/login';
     }
     return Promise.reject(error);
   }
 );
 
 const AdminDashboard = () => {
-  const navigate = useNavigate(); // Use navigate for redirection
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('bookings');
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -46,13 +45,36 @@ const AdminDashboard = () => {
 
   // Check authentication status
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      navigate('/admin/login'); // Redirect to login if no token
-    } else {
-      setIsAuthenticated(true); // Set authenticated status if token exists
-    }
-  }, [navigate]); // Add navigate to the dependency array
+    const checkAuth = async () => {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        navigate('/admin/login');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/auth/validate`, {
+          headers: {
+            Authorization: token
+          },
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem('adminToken');
+          navigate('/admin/login');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        localStorage.removeItem('adminToken');
+        navigate('/admin/login');
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const adminApi = {
     async getBookings() {
@@ -115,6 +137,8 @@ const AdminDashboard = () => {
 
     if (error.response?.status === 401) {
       setIsAuthenticated(false);
+      localStorage.removeItem('adminToken');
+      navigate('/admin/login');
     }
   };
 
@@ -139,7 +163,7 @@ const AdminDashboard = () => {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -147,7 +171,6 @@ const AdminDashboard = () => {
     }
   }, [loadDashboardData, isAuthenticated]);
 
-  // Define handleConfirm and handleReject functions
   const handleConfirm = async (bookingId) => {
     try {
       setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
@@ -156,13 +179,9 @@ const AdminDashboard = () => {
         message: 'Booking confirmed successfully!',
         type: 'success'
       });
-      loadDashboardData(); // Refresh data after action
+      loadDashboardData();
     } catch (error) {
       console.error('Error confirming booking:', error);
-      setAlertInfo({
-        message: 'Failed to confirm booking.',
-        type: 'error'
-      });
     } finally {
       setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
     }
@@ -176,20 +195,32 @@ const AdminDashboard = () => {
         message: 'Booking rejected successfully!',
         type: 'success'
       });
-      loadDashboardData(); // Refresh data after action
+      loadDashboardData();
     } catch (error) {
       console.error('Error rejecting booking:', error);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
+    }
+  };
+
+  const handleMarkDelivered = async (bookingId) => {
+    try {
+      setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
+      await adminApi.markDelivered(bookingId);
       setAlertInfo({
-        message: 'Failed to reject booking.',
-        type: 'error'
+        message: 'Booking marked as delivered successfully!',
+        type: 'success'
       });
+      loadDashboardData();
+    } catch (error) {
+      console.error('Error marking booking as delivered:', error);
     } finally {
       setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
     }
   };
 
   if (!isAuthenticated) {
-    return null; // Or a loading state if you prefer
+    return null;
   }
 
   if (loading && !isRefreshing) {
@@ -204,62 +235,157 @@ const AdminDashboard = () => {
     <div className="p-6 max-w-7xl mx-auto">
       <h2 className="text-2xl font-semibold text-gray-700">Admin Dashboard</h2>
       
-      {/* Display alert messages */}
       {alertInfo.message && (
-        <Alert message={alertInfo.message} type={alertInfo.type} />
+        <div className={`px-4 py-3 rounded-lg mb-4 ${
+          alertInfo.type === 'error' 
+            ? 'bg-red-100 text-red-800 border border-red-200' 
+            : 'bg-green-100 text-green-800 border border-green-200'
+        }`}>
+          <p className="text-sm">{alertInfo.message}</p>
+        </div>
       )}
 
-      {/* Booking Data */}
-      <div className="my-4">
-        <h3 className="text-xl font-medium text-gray-600">Bookings</h3>
-        <div>
-          {bookings.length === 0 ? (
-            <p>No bookings available.</p>
-          ) : (
-            <ul>
-              {bookings.map((booking) => (
-                <li key={booking.id}>
-                  <p>{booking.name}</p>
-                  <button
-                    onClick={() => handleConfirm(booking.id)}
-                    className="bg-green-500 text-white py-1 px-4 rounded"
-                    disabled={actionLoading[booking.id]}
-                  >
-                    {actionLoading[booking.id] ? 'Confirming...' : 'Confirm'}
-                  </button>
-                  <button
-                    onClick={() => handleReject(booking.id)}
-                    className="bg-red-500 text-white py-1 px-4 rounded"
-                    disabled={actionLoading[booking.id]}
-                  >
-                    {actionLoading[booking.id] ? 'Rejecting...' : 'Reject'}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      <div className="space-x-4 my-4">
+        <button
+          onClick={() => setActiveTab('bookings')}
+          className={`px-4 py-2 rounded-md ${
+            activeTab === 'bookings'
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-200 text-gray-700'
+          }`}
+        >
+          Bookings
+        </button>
+        <button
+          onClick={() => setActiveTab('contacts')}
+          className={`px-4 py-2 rounded-md ${
+            activeTab === 'contacts'
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-200 text-gray-700'
+          }`}
+        >
+          Contacts
+        </button>
       </div>
 
-      {/* Contacts Data */}
-      <div className="my-4">
-        <h3 className="text-xl font-medium text-gray-600">Contacts</h3>
-        <div>
-          {contacts.length === 0 ? (
-            <p>No contact messages available.</p>
-          ) : (
-            <ul>
-              {contacts.map((contact) => (
-                <li key={contact.id}>
-                  <p>{contact.name}</p>
-                  <p>{contact.email}</p>
-                  <p>{contact.message}</p>
-                </li>
-              ))}
-            </ul>
-          )}
+      {activeTab === 'bookings' && (
+        <div className="my-8">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Bookings</h3>
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            {bookings.length === 0 ? (
+              <p className="p-4 text-gray-500">No bookings available.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {bookings.map((booking) => (
+                      <tr key={booking.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{booking.name}</div>
+                          <div className="text-sm text-gray-500">{booking.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            booking.status === 'confirmed'
+                              ? 'bg-green-100 text-green-800'
+                              : booking.status === 'rejected'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(booking.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                          {booking.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleConfirm(booking.id)}
+                                disabled={actionLoading[booking.id]}
+                                className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {actionLoading[booking.id] ? 'Confirming...' : 'Confirm'}
+                              </button>
+                              <button
+                                onClick={() => handleReject(booking.id)}
+                                disabled={actionLoading[booking.id]}
+                                className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {actionLoading[booking.id] ? 'Rejecting...' : 'Reject'}
+                              </button>
+                            </>
+                          )}
+                          {booking.status === 'confirmed' && !booking.delivered && (
+                            <button
+                              onClick={() => handleMarkDelivered(booking.id)}
+                              disabled={actionLoading[booking.id]}
+                              className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {actionLoading[booking.id] ? 'Marking...' : 'Mark Delivered'}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === 'contacts' && (
+        <div className="my-8">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Contact Messages</h3>
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            {contacts.length === 0 ? (
+              <p className="p-4 text-gray-500">No contact messages available.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {contacts.map((contact) => (
+                      <tr key={contact.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{contact.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">{contact.email}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">{contact.message}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(contact.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

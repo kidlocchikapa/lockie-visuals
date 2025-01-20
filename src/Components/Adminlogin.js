@@ -9,39 +9,35 @@ const AdminLogin = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [adminToken, setAdminToken] = useState(localStorage.getItem("adminToken"));
-
   const navigate = useNavigate();
 
-  // Effect to check for token on mount (if already logged in)
   useEffect(() => {
-    // Check if there's an admin token in localStorage
-    const storedToken = localStorage.getItem("adminToken");
+    const validateToken = async (token) => {
+      try {
+        const response = await fetch(`${API_URL}/validate`, {
+          method: "GET",
+          headers: {
+            Authorization: token,
+          },
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          navigate("/admin/dashboard");
+        } else {
+          localStorage.removeItem("adminToken");
+        }
+      } catch (error) {
+        console.error("Token validation error:", error);
+        localStorage.removeItem("adminToken");
+      }
+    };
 
-    if (storedToken) {
-      console.log("Token found in localStorage:", storedToken);
-      setAdminToken(storedToken); // Update state with the stored token
-      navigate("/admin/dashboard"); // Redirect if already logged in
+    const token = localStorage.getItem("adminToken");
+    if (token) {
+      validateToken(token);
     }
   }, [navigate]);
-
-  // Effect for handling successful login and redirecting
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        navigate("/admin/dashboard");
-      }, 2000); // Delay the redirect for 2 seconds to show success message
-      return () => clearTimeout(timer);
-    }
-  }, [success, navigate]);
-
-  // Effect for handling error display timeout
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(""), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -58,28 +54,23 @@ const AdminLogin = () => {
 
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json" 
+        },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        let token = data.access_token;
+      if (response.ok && data.access_token) {
+        const token = data.access_token.startsWith("Bearer ") 
+          ? data.access_token 
+          : `Bearer ${data.access_token}`;
 
-        // Ensure the token has the "Bearer" prefix if it's not already there
-        if (!token.startsWith("Bearer ")) {
-          token = `Bearer ${token}`;
-        }
-
-        // Save token to localStorage
         localStorage.setItem("adminToken", token);
-        console.log("Token saved in localStorage:", token);
-
-        // Set the state with the new token for persistent UI updates
-        setAdminToken(token);
-
-        setSuccess("Login successful! Redirecting to admin dashboard...");
+        setSuccess("Login successful!");
+        navigate("/admin/dashboard");
       } else {
         setError(data.message || "Invalid credentials. Please try again.");
       }
@@ -94,11 +85,26 @@ const AdminLogin = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-md">
-        <h2 className="text-center text-3xl font-extrabold text-gray-900">Admin Login</h2>
-        {error && <Alert type="error" message={error} />}
-        {success && <Alert type="success" message={success} />}
+        <div>
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            Admin Login
+          </h2>
+        </div>
+        
+        {error && (
+          <div className="px-4 py-3 rounded-lg mb-4 bg-red-100 text-red-800 border border-red-200">
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+        
+        {success && (
+          <div className="px-4 py-3 rounded-lg mb-4 bg-green-100 text-green-800 border border-green-200">
+            <p className="text-sm">{success}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
@@ -110,9 +116,11 @@ const AdminLogin = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="Admin Email"
               />
             </div>
+            
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
@@ -124,31 +132,33 @@ const AdminLogin = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="Password"
               />
             </div>
           </div>
-          <button
-            type="submit"
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none"
-            disabled={isLoading}
-          >
-            {isLoading ? "Logging in..." : "Login"}
-          </button>
+
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Logging in...
+                </span>
+              ) : (
+                "Login"
+              )}
+            </button>
+          </div>
         </form>
       </div>
-    </div>
-  );
-};
-
-// Alert component to display error or success messages
-const Alert = ({ type, message }) => {
-  const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
-  const textColor = type === "error" ? "text-red-800" : "text-green-800";
-
-  return (
-    <div className={`${bgColor} ${textColor} px-4 py-3 rounded-lg shadow-md`}>
-      {message}
     </div>
   );
 };
