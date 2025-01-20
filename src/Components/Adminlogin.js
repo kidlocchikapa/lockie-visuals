@@ -9,20 +9,11 @@ const AdminLogin = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [adminToken, setAdminToken] = useState(localStorage.getItem("adminToken"));
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log("AdminLogin component mounted");
-  }, []);
-
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(""), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
+  // Effect for handling the successful login and redirection
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
@@ -31,6 +22,14 @@ const AdminLogin = () => {
       return () => clearTimeout(timer);
     }
   }, [success, navigate]);
+
+  // Effect for handling error display timeout
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(""), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -58,9 +57,12 @@ const AdminLogin = () => {
           ? data.access_token
           : `Bearer ${data.access_token}`;
 
-        // Store token as adminToken to match AdminDashboard
+        // Store the token in localStorage
         localStorage.setItem("adminToken", token);
         console.log("Token stored:", token);
+
+        // Set the state with the new token for persistent UI updates
+        setAdminToken(token);
 
         setSuccess("Login successful! Redirecting to admin dashboard...");
       } else {
@@ -124,6 +126,7 @@ const AdminLogin = () => {
   );
 };
 
+// Alert component to display error or success messages
 const Alert = ({ type, message }) => {
   const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
   const textColor = type === "error" ? "text-red-800" : "text-green-800";
