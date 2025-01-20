@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import Alert from '../Components/ui/alert';
 import axios from 'axios';
 
@@ -27,36 +27,14 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Clear token and redirect to login
       localStorage.removeItem('adminToken');
-      window.location.href = '/admin/login';
+      window.location.href = '/admin/login'; // Redirect to login if 401
     }
     return Promise.reject(error);
   }
 );
 
-const Button = ({ children, variant = 'default', className = '', disabled, onClick }) => {
-  const baseStyles = "px-4 py-2 rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
-  
-  const variants = {
-    default: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
-    outline: "border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500",
-    success: "bg-green-50 text-green-700 hover:bg-green-100 focus:ring-green-500",
-    danger: "bg-red-50 text-red-700 hover:bg-red-100 focus:ring-red-500",
-    info: "bg-blue-50 text-blue-700 hover:bg-blue-100 focus:ring-blue-500"
-  };
-
-  return (
-    <button
-      className={`${baseStyles} ${variants[variant]} ${className}`}
-      disabled={disabled}
-      onClick={onClick}
-      type="button"
-    >
-      {children}
-    </button>
-  );
-};
-
 const AdminDashboard = () => {
+  const navigate = useNavigate(); // Use navigate for redirection
   const [activeTab, setActiveTab] = useState('bookings');
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -70,11 +48,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
-      window.location.href = '/admin/login';
+      navigate('/admin/login'); // Use navigate to redirect to login
     } else {
       setIsAuthenticated(true);
     }
-  }, []);
+  }, [navigate]); // Add navigate to the dependency array
 
   const adminApi = {
     async getBookings() {
@@ -168,9 +146,6 @@ const AdminDashboard = () => {
       loadDashboardData();
     }
   }, [loadDashboardData, isAuthenticated]);
-
-  // Rest of your component code remains the same...
-  // (Button handlers, status badge, and render logic)
 
   if (!isAuthenticated) {
     return null; // Or a loading state if you prefer
