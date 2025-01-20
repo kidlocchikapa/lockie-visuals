@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "https://lockievisualbackend.onrender.com/auth";
 
@@ -13,7 +13,15 @@ const AdminLogin = () => {
 
   const navigate = useNavigate();
 
-  // Effect for handling the successful login and redirection
+  // Effect to check for token on mount (if already logged in)
+  useEffect(() => {
+    if (adminToken) {
+      console.log("Token found in localStorage:", adminToken);
+      navigate("/admin/dashboard"); // Redirect if already logged in
+    }
+  }, [adminToken, navigate]);
+
+  // Effect for handling successful login and redirecting
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
@@ -57,9 +65,9 @@ const AdminLogin = () => {
           ? data.access_token
           : `Bearer ${data.access_token}`;
 
-        // Store the token in localStorage
+        // Store token in localStorage
         localStorage.setItem("adminToken", token);
-        console.log("Token stored:", token);
+        console.log("Token saved in localStorage:", token);
 
         // Set the state with the new token for persistent UI updates
         setAdminToken(token);
