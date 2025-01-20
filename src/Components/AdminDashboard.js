@@ -48,9 +48,9 @@ const AdminDashboard = () => {
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
-      navigate('/admin/login'); // Use navigate to redirect to login
+      navigate('/admin/login'); // Redirect to login if no token
     } else {
-      setIsAuthenticated(true);
+      setIsAuthenticated(true); // Set authenticated status if token exists
     }
   }, [navigate]); // Add navigate to the dependency array
 
@@ -162,7 +162,62 @@ const AdminDashboard = () => {
   // Your existing return statement with the dashboard UI...
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* Rest of your JSX remains the same */}
+      <h2 className="text-2xl font-semibold text-gray-700">Admin Dashboard</h2>
+      
+      {/* Display alert messages */}
+      {alertInfo.message && (
+        <Alert message={alertInfo.message} type={alertInfo.type} />
+      )}
+
+      {/* Booking Data */}
+      <div className="my-4">
+        <h3 className="text-xl font-medium text-gray-600">Bookings</h3>
+        <div>
+          {bookings.length === 0 ? (
+            <p>No bookings available.</p>
+          ) : (
+            <ul>
+              {bookings.map((booking) => (
+                <li key={booking.id}>
+                  <p>{booking.name}</p>
+                  <button
+                    onClick={() => handleConfirm(booking.id)}
+                    className="bg-green-500 text-white py-1 px-4 rounded"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => handleReject(booking.id)}
+                    className="bg-red-500 text-white py-1 px-4 rounded"
+                  >
+                    Reject
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* Contacts Data */}
+      <div className="my-4">
+        <h3 className="text-xl font-medium text-gray-600">Contacts</h3>
+        <div>
+          {contacts.length === 0 ? (
+            <p>No contact messages available.</p>
+          ) : (
+            <ul>
+              {contacts.map((contact) => (
+                <li key={contact.id}>
+                  <p>{contact.name}</p>
+                  <p>{contact.email}</p>
+                  <p>{contact.message}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
