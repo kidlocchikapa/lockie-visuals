@@ -12,22 +12,17 @@ const AdminLogin = () => {
 
   const navigate = useNavigate();
 
-  // Clear token only if explicitly required (e.g., logout)
   useEffect(() => {
     console.log("AdminLogin component mounted");
   }, []);
 
-  // Automatically clear error messages after 2 seconds
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => {
-        setError("");
-      }, 2000);
+      const timer = setTimeout(() => setError(""), 2000);
       return () => clearTimeout(timer);
     }
   }, [error]);
 
-  // Redirect after successful login
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
@@ -63,8 +58,8 @@ const AdminLogin = () => {
           ? data.access_token
           : `Bearer ${data.access_token}`;
 
-        // Store the token persistently in localStorage
-        localStorage.setItem("token", token);
+        // Store token as adminToken to match AdminDashboard
+        localStorage.setItem("adminToken", token);
         console.log("Token stored:", token);
 
         setSuccess("Login successful! Redirecting to admin dashboard...");
@@ -82,75 +77,47 @@ const AdminLogin = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-md">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Admin Login
-          </h2>
-        </div>
+        <h2 className="text-center text-3xl font-extrabold text-gray-900">Admin Login</h2>
         {error && <Alert type="error" message={error} />}
         {success && <Alert type="success" message={success} />}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label
-                className="block text-sm font-medium text-gray-700"
-                htmlFor="email"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
                 required
-                className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
               />
             </div>
             <div>
-              <label
-                className="block text-sm font-medium text-gray-700"
-                htmlFor="password"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
               <input
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
                 required
-                className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
               />
             </div>
           </div>
-
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link
-                to="/forgot-password"
-                className="font-medium text-orange-500 hover:text-orange-600"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-              disabled={isLoading}
-            >
-              {isLoading ? "Logging in..." : "Login"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none"
+            disabled={isLoading}
+          >
+            {isLoading ? "Logging in..." : "Login"}
+          </button>
         </form>
       </div>
     </div>
@@ -160,12 +127,9 @@ const AdminLogin = () => {
 const Alert = ({ type, message }) => {
   const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
   const textColor = type === "error" ? "text-red-800" : "text-green-800";
-  const borderColor = type === "error" ? "border-red-200" : "border-green-200";
 
   return (
-    <div
-      className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4 shadow-md animate-fade-in-down`}
-    >
+    <div className={`${bgColor} ${textColor} px-4 py-3 rounded-lg shadow-md`}>
       {message}
     </div>
   );
