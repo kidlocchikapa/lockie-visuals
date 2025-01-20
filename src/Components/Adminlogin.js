@@ -61,11 +61,14 @@ const AdminLogin = () => {
       const data = await response.json();
 
       if (response.ok) {
-        const token = data.access_token.startsWith("Bearer ")
-          ? data.access_token
-          : `Bearer ${data.access_token}`;
+        let token = data.access_token;
 
-        // Store token in localStorage
+        // Ensure the token has the "Bearer" prefix if it's not already there
+        if (!token.startsWith("Bearer ")) {
+          token = `Bearer ${token}`;
+        }
+
+        // Save token to localStorage
         localStorage.setItem("adminToken", token);
         console.log("Token saved in localStorage:", token);
 
