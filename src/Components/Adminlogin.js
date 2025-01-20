@@ -9,17 +9,17 @@ const AdminLogin = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [adminToken, setAdminToken] = useState(localStorage.getItem("adminToken"));
+  const [token, setToken] = useState(localStorage.getItem("token")); // Check if token exists
 
   const navigate = useNavigate();
 
   // Effect to check for token on mount (if already logged in)
   useEffect(() => {
-    if (adminToken) {
-      console.log("Token found in localStorage:", adminToken);
+    if (token) {
+      console.log("Token found in localStorage:", token);
       navigate("/admin/dashboard"); // Redirect if already logged in
     }
-  }, [adminToken, navigate]);
+  }, [token, navigate]);
 
   // Effect for handling successful login and redirecting
   useEffect(() => {
@@ -69,11 +69,11 @@ const AdminLogin = () => {
         }
 
         // Save token to localStorage
-        localStorage.setItem("adminToken", token);
+        localStorage.setItem("token", token); // Store it as "token"
         console.log("Token saved in localStorage:", token);
 
         // Set the state with the new token for persistent UI updates
-        setAdminToken(token);
+        setToken(token);
 
         setSuccess("Login successful! Redirecting to admin dashboard...");
       } else {
