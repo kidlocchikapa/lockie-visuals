@@ -147,6 +147,47 @@ const AdminDashboard = () => {
     }
   }, [loadDashboardData, isAuthenticated]);
 
+  // Define handleConfirm and handleReject functions
+  const handleConfirm = async (bookingId) => {
+    try {
+      setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
+      await adminApi.confirmBooking(bookingId);
+      setAlertInfo({
+        message: 'Booking confirmed successfully!',
+        type: 'success'
+      });
+      loadDashboardData(); // Refresh data after action
+    } catch (error) {
+      console.error('Error confirming booking:', error);
+      setAlertInfo({
+        message: 'Failed to confirm booking.',
+        type: 'error'
+      });
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
+    }
+  };
+
+  const handleReject = async (bookingId) => {
+    try {
+      setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
+      await adminApi.rejectBooking(bookingId);
+      setAlertInfo({
+        message: 'Booking rejected successfully!',
+        type: 'success'
+      });
+      loadDashboardData(); // Refresh data after action
+    } catch (error) {
+      console.error('Error rejecting booking:', error);
+      setAlertInfo({
+        message: 'Failed to reject booking.',
+        type: 'error'
+      });
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
+    }
+  };
+
   if (!isAuthenticated) {
     return null; // Or a loading state if you prefer
   }
@@ -159,7 +200,6 @@ const AdminDashboard = () => {
     );
   }
 
-  // Your existing return statement with the dashboard UI...
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h2 className="text-2xl font-semibold text-gray-700">Admin Dashboard</h2>
@@ -183,14 +223,16 @@ const AdminDashboard = () => {
                   <button
                     onClick={() => handleConfirm(booking.id)}
                     className="bg-green-500 text-white py-1 px-4 rounded"
+                    disabled={actionLoading[booking.id]}
                   >
-                    Confirm
+                    {actionLoading[booking.id] ? 'Confirming...' : 'Confirm'}
                   </button>
                   <button
                     onClick={() => handleReject(booking.id)}
                     className="bg-red-500 text-white py-1 px-4 rounded"
+                    disabled={actionLoading[booking.id]}
                   >
-                    Reject
+                    {actionLoading[booking.id] ? 'Rejecting...' : 'Reject'}
                   </button>
                 </li>
               ))}
