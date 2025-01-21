@@ -1,12 +1,10 @@
-// AdminDashboard.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// Updated base URL to match the backend structure
 const API_URL = 'https://lockievisualbackend.onrender.com';
 
-// Create axios instance
+// Create axios instance with the necessary configurations
 const apiClient = axios.create({
   baseURL: API_URL,
   timeout: 10000,
@@ -17,7 +15,7 @@ const apiClient = axios.create({
   }
 });
 
-// Add request interceptor
+// Interceptors for request and response handling
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -28,7 +26,6 @@ apiClient.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-// Add response interceptor
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -40,12 +37,9 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Alert Component to display messages
 const Alert = ({ message, type }) => (
-  <div className={`px-4 py-3 rounded-lg mb-4 ${
-    type === 'error' 
-      ? 'bg-red-100 text-red-800 border border-red-200' 
-      : 'bg-green-100 text-green-800 border border-green-200'
-  }`}>
+  <div className={`px-4 py-3 rounded-lg mb-4 ${type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
     <p className="text-sm">{message}</p>
   </div>
 );
@@ -58,9 +52,9 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [alertInfo, setAlertInfo] = useState({ message: '', type: '' });
   const [actionLoading, setActionLoading] = useState({});
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Check authentication status and redirect if not authenticated
   const checkAuth = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -69,7 +63,6 @@ const AdminDashboard = () => {
     }
 
     try {
-      // Using the /auth/user endpoint instead of /auth/verify
       const response = await apiClient.get('/auth/users');
       if (response.data) {
         setIsAuthenticated(true);
@@ -83,19 +76,14 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
+  // Fetch data when authenticated
   const loadDashboardData = useCallback(async () => {
     if (!isAuthenticated) return;
 
     try {
       setLoading(true);
       setAlertInfo({ message: '', type: '' });
-      setIsRefreshing(true);
 
-      // Using the correct endpoints for admin routes
       const [bookingsRes, contactsRes] = await Promise.all([
         apiClient.get('/admin/bookings'),
         apiClient.get('/admin/contacts')
@@ -104,126 +92,73 @@ const AdminDashboard = () => {
       setBookings(bookingsRes.data);
       setContacts(contactsRes.data);
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
-      setAlertInfo({
-        message: error.response?.data?.message || 'Failed to load data',
-        type: 'error'
-      });
-      
-      // If we get a 401/403, the interceptor will handle the redirect
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        return;
-      }
+      console.error('Error loading dashboard data:', error);
+      setAlertInfo({ message: 'Failed to load data', type: 'error' });
     } finally {
       setLoading(false);
-      setIsRefreshing(false);
     }
   }, [isAuthenticated]);
+
+  // Handle actions (confirm, reject, etc.) for bookings
+  const handleBookingAction = async (bookingId, actionType) => {
+    setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
+
+    try {
+      let actionResponse;
+      if (actionType === 'confirm') {
+        actionResponse = await apiClient.post(`/admin/bookings/${bookingId}/confirm`);
+      } else if (actionType === 'reject') {
+        actionResponse = await apiClient.post(`/admin/bookings/${bookingId}/reject`);
+      } else if (actionType === 'deliver') {
+        actionResponse = await apiClient.post(`/admin/bookings/${bookingId}/deliver`);
+      }
+
+      setAlertInfo({
+        message: `Booking ${actionType}ed successfully!`,
+        type: 'success'
+      });
+      loadDashboardData();
+    } catch (error) {
+      console.error(`Error during ${actionType} booking:`, error);
+      setAlertInfo({
+        message: error.response?.data?.message || `Failed to ${actionType} booking`,
+        type: 'error'
+      });
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   useEffect(() => {
     if (isAuthenticated) {
       loadDashboardData();
     }
-  }, [loadDashboardData, isAuthenticated]);
+  }, [isAuthenticated, loadDashboardData]);
 
-  const handleConfirm = async (bookingId) => {
-    try {
-      setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
-      await apiClient.post(`/admin/bookings/${bookingId}/confirm`);
-      setAlertInfo({
-        message: 'Booking confirmed successfully!',
-        type: 'success'
-      });
-      loadDashboardData();
-    } catch (error) {
-      console.error('Error confirming booking:', error);
-      setAlertInfo({
-        message: error.response?.data?.message || 'Failed to confirm booking',
-        type: 'error'
-      });
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
-    }
-  };
-
-  const handleReject = async (bookingId) => {
-    try {
-      setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
-      await apiClient.post(`/admin/bookings/${bookingId}/reject`);
-      setAlertInfo({
-        message: 'Booking rejected successfully!',
-        type: 'success'
-      });
-      loadDashboardData();
-    } catch (error) {
-      console.error('Error rejecting booking:', error);
-      setAlertInfo({
-        message: error.response?.data?.message || 'Failed to reject booking',
-        type: 'error'
-      });
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
-    }
-  };
-
-  const handleMarkDelivered = async (bookingId) => {
-    try {
-      setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
-      await apiClient.post(`/admin/bookings/${bookingId}/deliver`);
-      setAlertInfo({
-        message: 'Booking marked as delivered successfully!',
-        type: 'success'
-      });
-      loadDashboardData();
-    } catch (error) {
-      console.error('Error marking booking as delivered:', error);
-      setAlertInfo({
-        message: error.response?.data?.message || 'Failed to mark as delivered',
-        type: 'error'
-      });
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
-    }
-  };
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  if (loading && !isRefreshing) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
+  if (!isAuthenticated || loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h2 className="text-2xl font-semibold text-gray-700">Admin Dashboard</h2>
 
-      {alertInfo.message && (
-        <Alert message={alertInfo.message} type={alertInfo.type} />
-      )}
+      {alertInfo.message && <Alert message={alertInfo.message} type={alertInfo.type} />}
 
       <div className="space-x-4 my-4">
         <button
           onClick={() => setActiveTab('bookings')}
-          className={`px-4 py-2 rounded-md ${
-            activeTab === 'bookings'
-              ? 'bg-orange-500 text-white'
-              : 'bg-gray-200 text-gray-700'
-          }`}
+          className={`px-4 py-2 rounded-md ${activeTab === 'bookings' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
         >
           Bookings
         </button>
         <button
           onClick={() => setActiveTab('contacts')}
-          className={`px-4 py-2 rounded-md ${
-            activeTab === 'contacts'
-              ? 'bg-orange-500 text-white'
-              : 'bg-gray-200 text-gray-700'
-          }`}
+          className={`px-4 py-2 rounded-md ${activeTab === 'contacts' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
         >
           Contacts
         </button>
@@ -254,32 +189,24 @@ const AdminDashboard = () => {
                           <div className="text-sm text-gray-500">{booking.email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            booking.status === 'confirmed'
-                              ? 'bg-green-100 text-green-800'
-                              : booking.status === 'rejected'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : booking.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
                             {booking.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(booking.date).toLocaleDateString()}
-                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(booking.date).toLocaleDateString()}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <div className="flex space-x-2">
                             {booking.status === 'pending' && (
                               <>
                                 <button
-                                  onClick={() => handleConfirm(booking.id)}
+                                  onClick={() => handleBookingAction(booking.id, 'confirm')}
                                   disabled={actionLoading[booking.id]}
                                   className="text-green-500 hover:text-green-700"
                                 >
                                   {actionLoading[booking.id] ? 'Confirming...' : 'Confirm'}
                                 </button>
                                 <button
-                                  onClick={() => handleReject(booking.id)}
+                                  onClick={() => handleBookingAction(booking.id, 'reject')}
                                   disabled={actionLoading[booking.id]}
                                   className="text-red-500 hover:text-red-700"
                                 >
@@ -289,7 +216,7 @@ const AdminDashboard = () => {
                             )}
                             {booking.status === 'confirmed' && (
                               <button
-                                onClick={() => handleMarkDelivered(booking.id)}
+                                onClick={() => handleBookingAction(booking.id, 'deliver')}
                                 disabled={actionLoading[booking.id]}
                                 className="text-blue-500 hover:text-blue-700"
                               >
