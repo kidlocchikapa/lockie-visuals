@@ -1,9 +1,9 @@
-// AdminLogin.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "https://lockievisualbackend.onrender.com/auth";  // Updated to match the other login component
+const API_URL = "https://lockievisualbackend.onrender.com/auth"; // Ensure this matches your backend URL
 
+// Alert Component to display success or error messages
 const Alert = ({ type, message }) => {
   const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
   const textColor = type === "error" ? "text-red-800" : "text-green-800";
@@ -44,7 +44,7 @@ const AdminLogin = () => {
     if (success) {
       const timer = setTimeout(() => {
         setSuccess("");
-        navigate("/admin/dashboard");
+        navigate("/admin/dashboard"); // Redirect to admin dashboard after success
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -73,11 +73,11 @@ const AdminLogin = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store token with Bearer prefix
+        // Store token with 'Bearer' prefix
         const token = data.access_token.startsWith('Bearer ') 
           ? data.access_token 
           : `Bearer ${data.access_token}`;
-        
+
         localStorage.setItem("token", token);
         setSuccess("Login successful! Redirecting to admin dashboard...");
       } else {
@@ -99,12 +99,14 @@ const AdminLogin = () => {
             Admin Login
           </h2>
         </div>
-        
+
+        {/* Display error and success messages */}
         {error && <Alert type="error" message={error} />}
         {success && <Alert type="success" message={success} />}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm space-y-4">
+            {/* Email input */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
@@ -120,7 +122,8 @@ const AdminLogin = () => {
                 placeholder="Admin Email"
               />
             </div>
-            
+
+            {/* Password input */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
@@ -138,6 +141,7 @@ const AdminLogin = () => {
             </div>
           </div>
 
+          {/* Submit button */}
           <div>
             <button
               type="submit"
