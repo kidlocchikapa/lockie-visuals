@@ -18,7 +18,7 @@ const apiClient = axios.create({
 
 // Add request interceptor
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken');
+  const token = localStorage.getItem('token'); // Changed here to use 'token' instead of 'adminToken'
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -32,7 +32,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      localStorage.removeItem('adminToken');
+      localStorage.removeItem('token'); // Changed here to use 'token' instead of 'adminToken'
       window.location.href = '/admin/login';
     }
     return Promise.reject(error);
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const checkAuth = useCallback(async () => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('token'); // Changed here to use 'token' instead of 'adminToken'
     if (!token) {
       navigate('/admin/login');
       return;
@@ -62,7 +62,7 @@ const AdminDashboard = () => {
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('adminToken');
+      localStorage.removeItem('token'); // Changed here to use 'token' instead of 'adminToken'
       navigate('/admin/login');
     }
   }, [navigate]);
@@ -248,69 +248,37 @@ const AdminDashboard = () => {
                             {booking.status}
                           </span>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(booking.date).toLocaleDateString()}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(booking.date).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                          <button
-                            onClick={() => handleConfirm(booking.id)}
-                            className="text-green-600 hover:text-green-900"
-                            disabled={actionLoading[booking.id]}
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => handleReject(booking.id)}
-                            className="text-red-600 hover:text-red-900"
-                            disabled={actionLoading[booking.id]}
-                          >
-                            Reject
-                          </button>
-                          <button
-                            onClick={() => handleMarkDelivered(booking.id)}
-                            className="text-blue-600 hover:text-blue-900"
-                            disabled={actionLoading[booking.id]}
-                          >
-                            Mark Delivered
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'contacts' && (
-        <div className="my-8">
-          <h3 className="text-xl font-medium text-gray-600 mb-4">Contacts</h3>
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            {contacts.length === 0 ? (
-              <p className="p-4 text-gray-500">No contacts available.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {contacts.map((contact) => (
-                      <tr key={contact.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{contact.name}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contact.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contact.message}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(contact.date).toLocaleDateString()}
+                          <div className="flex space-x-2">
+                            {booking.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleConfirm(booking.id)}
+                                  disabled={actionLoading[booking.id]}
+                                  className="text-green-500 hover:text-green-700"
+                                >
+                                  {actionLoading[booking.id] ? 'Confirming...' : 'Confirm'}
+                                </button>
+                                <button
+                                  onClick={() => handleReject(booking.id)}
+                                  disabled={actionLoading[booking.id]}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  {actionLoading[booking.id] ? 'Rejecting...' : 'Reject'}
+                                </button>
+                              </>
+                            )}
+                            {booking.status === 'confirmed' && (
+                              <button
+                                onClick={() => handleMarkDelivered(booking.id)}
+                                disabled={actionLoading[booking.id]}
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                {actionLoading[booking.id] ? 'Delivering...' : 'Mark as Delivered'}
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

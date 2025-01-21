@@ -14,7 +14,7 @@ const AdminLogin = () => {
 
   useEffect(() => {
     // Clear any existing token on component mount
-    localStorage.removeItem("adminToken");
+    localStorage.removeItem("token");
   }, []);
 
   const handleSubmit = async (event) => {
@@ -47,7 +47,7 @@ const AdminLogin = () => {
         const token = data.access_token.startsWith('Bearer ') 
           ? data.access_token 
           : `Bearer ${data.access_token}`;
-        localStorage.setItem("adminToken", token);
+        localStorage.setItem("token", token); // Store token instead of adminToken
         setSuccess("Login successful!");
         navigate("/admin/dashboard");
       } else {
