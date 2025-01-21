@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'https://lockievisualbackend.onrender.com';
+const API_URL = 'https://lockievisualbackend.onrender.com/auth'; // Updated to match login components
 
 // Create axios instance
 const apiClient = axios.create({
@@ -18,9 +18,9 @@ const apiClient = axios.create({
 
 // Add request interceptor
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // Changed here to use 'token' instead of 'adminToken'
+  const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
   }
   return config;
 }, (error) => {
@@ -32,7 +32,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      localStorage.removeItem('token'); // Changed here to use 'token' instead of 'adminToken'
+      localStorage.removeItem('token');
       window.location.href = '/admin/login';
     }
     return Promise.reject(error);
@@ -50,19 +50,29 @@ const AdminDashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const Alert = ({ message, type }) => (
+    <div className={`px-4 py-3 rounded-lg mb-4 ${
+      type === 'error' 
+        ? 'bg-red-100 text-red-800 border border-red-200' 
+        : 'bg-green-100 text-green-800 border border-green-200'
+    }`}>
+      <p className="text-sm">{message}</p>
+    </div>
+  );
+
   const checkAuth = useCallback(async () => {
-    const token = localStorage.getItem('token'); // Changed here to use 'token' instead of 'adminToken'
+    const token = localStorage.getItem('token');
     if (!token) {
       navigate('/admin/login');
       return;
     }
 
     try {
-      await apiClient.get('/auth');
+      const response = await apiClient.get('/verify'); // Updated endpoint for auth verification
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('token'); // Changed here to use 'token' instead of 'adminToken'
+      localStorage.removeItem('token');
       navigate('/admin/login');
     }
   }, [navigate]);
@@ -80,7 +90,7 @@ const AdminDashboard = () => {
       setIsRefreshing(true);
 
       const [bookingsRes, contactsRes] = await Promise.all([
-        apiClient.get('/admin/bookings'),
+        apiClient.get('/admin/bookings'), // These endpoints remain the same as they're admin-specific
         apiClient.get('/admin/contacts')
       ]);
 
@@ -181,13 +191,7 @@ const AdminDashboard = () => {
       <h2 className="text-2xl font-semibold text-gray-700">Admin Dashboard</h2>
 
       {alertInfo.message && (
-        <div className={`px-4 py-3 rounded-lg mb-4 ${
-          alertInfo.type === 'error' 
-            ? 'bg-red-100 text-red-800 border border-red-200' 
-            : 'bg-green-100 text-green-800 border border-green-200'
-        }`}>
-          <p className="text-sm">{alertInfo.message}</p>
-        </div>
+        <Alert message={alertInfo.message} type={alertInfo.type} />
       )}
 
       <div className="space-x-4 my-4">
@@ -248,7 +252,9 @@ const AdminDashboard = () => {
                             {booking.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(booking.date).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(booking.date).toLocaleDateString()}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <div className="flex space-x-2">
                             {booking.status === 'pending' && (

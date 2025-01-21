@@ -2,7 +2,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "https://lockievisualbackend.onrender.com";
+const API_URL = "https://lockievisualbackend.onrender.com/auth";  // Updated to match the other login component
+
+const Alert = ({ type, message }) => {
+  const bgColor = type === "error" ? "bg-red-100" : "bg-green-100";
+  const textColor = type === "error" ? "text-red-800" : "text-green-800";
+  const borderColor = type === "error" ? "border-red-200" : "border-green-200";
+
+  return (
+    <div
+      className={`${bgColor} ${textColor} px-4 py-3 rounded-lg border ${borderColor} mb-4 shadow-md animate-fade-in-down`}
+    >
+      {message}
+    </div>
+  );
+};
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +31,25 @@ const AdminLogin = () => {
     localStorage.removeItem("token");
   }, []);
 
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess("");
+        navigate("/admin/dashboard");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -30,32 +63,29 @@ const AdminLogin = () => {
       setError("");
       setSuccess("");
 
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
-        headers: { 
-          'Accept': 'application/json',
-          'Content-Type': "application/json" 
-        },
-        credentials: 'include',
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       const data = await response.json();
 
-      if (response.ok && data.access_token) {
-        // Ensure token has Bearer prefix
+      if (response.ok) {
+        // Store token with Bearer prefix
         const token = data.access_token.startsWith('Bearer ') 
           ? data.access_token 
           : `Bearer ${data.access_token}`;
-        localStorage.setItem("token", token); // Store token instead of adminToken
-        setSuccess("Login successful!");
-        navigate("/admin/dashboard");
+        
+        localStorage.setItem("token", token);
+        setSuccess("Login successful! Redirecting to admin dashboard...");
       } else {
-        throw new Error(data.message || "Invalid credentials");
+        setError(data.message || "Invalid credentials. Please try again.");
       }
     } catch (error) {
-      console.error("Login error:", error);
-      setError(error.message || "Login failed. Please try again.");
+      setError("Network error. Please try again later.");
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -70,17 +100,8 @@ const AdminLogin = () => {
           </h2>
         </div>
         
-        {error && (
-          <div className="px-4 py-3 rounded-lg mb-4 bg-red-100 text-red-800 border border-red-200">
-            <p className="text-sm">{error}</p>
-          </div>
-        )}
-        
-        {success && (
-          <div className="px-4 py-3 rounded-lg mb-4 bg-green-100 text-green-800 border border-green-200">
-            <p className="text-sm">{success}</p>
-          </div>
-        )}
+        {error && <Alert type="error" message={error} />}
+        {success && <Alert type="success" message={success} />}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm space-y-4">
@@ -124,7 +145,7 @@ const AdminLogin = () => {
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
-                <span className="flex items-center">
+                <span className="flex items-center justify-center">
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
