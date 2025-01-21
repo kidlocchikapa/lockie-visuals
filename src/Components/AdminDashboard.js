@@ -1,10 +1,11 @@
+// AdminDashboard.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API_URL = 'https://lockievisualbackend.onrender.com';
 
-// Create axios instance with default config
+// Create axios instance
 const apiClient = axios.create({
   baseURL: API_URL,
   timeout: 10000,
@@ -15,7 +16,7 @@ const apiClient = axios.create({
   }
 });
 
-// Add auth token to requests
+// Add request interceptor
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('adminToken');
   if (token) {
@@ -26,13 +27,11 @@ apiClient.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-// Handle response errors globally
+// Add response interceptor
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.error('API Error:', error.response?.status, error.response?.data);
     if (error.response?.status === 401 || error.response?.status === 403) {
-      console.log('Token expired or invalid - logging out');
       localStorage.removeItem('adminToken');
       window.location.href = '/admin/login';
     }
@@ -51,81 +50,54 @@ const AdminDashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('adminToken');
-      console.log('Checking auth with token:', token?.substring(0, 20) + '...');
-      
-      if (!token) {
-        console.log('No token found, redirecting to login');
-        navigate('/admin/login');
-        return;
-      }
-
-      try {
-        const response = await apiClient.get('/auth/validate');
-        console.log('Auth validation response:', response.status);
-
-        if (response.status === 200) {
-          console.log('Authentication successful');
-          setIsAuthenticated(true);
-        } else {
-          throw new Error('Authentication failed');
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        localStorage.removeItem('adminToken');
-        navigate('/admin/login');
-      }
-    };
-
-    checkAuth();
-  }, [navigate]);
-
-  const handleApiError = (error) => {
-    console.error('API Error:', error);
-    const errorMessage = error.response?.data?.message || 'An error occurred';
-    setAlertInfo({
-      message: errorMessage,
-      type: 'error'
-    });
-
-    if (error.response?.status === 401) {
-      setIsAuthenticated(false);
-      localStorage.removeItem('adminToken');
+  const checkAuth = useCallback(async () => {
+    const token = localStorage.getItem('adminToken');
+    
+    if (!token) {
       navigate('/admin/login');
-    }
-  };
-
-  const loadDashboardData = useCallback(async () => {
-    if (!isAuthenticated) {
-      console.log('Not authenticated, skipping data load');
       return;
     }
 
     try {
-      console.log('Loading dashboard data...');
+      await apiClient.get('/auth/validate');
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      localStorage.removeItem('adminToken');
+      navigate('/admin/login');
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  const loadDashboardData = useCallback(async () => {
+    if (!isAuthenticated) return;
+
+    try {
       setLoading(true);
       setAlertInfo({ message: '', type: '' });
       setIsRefreshing(true);
 
-      const [bookingsResponse, contactsResponse] = await Promise.all([
+      const [bookingsRes, contactsRes] = await Promise.all([
         apiClient.get('/admin/bookings'),
         apiClient.get('/admin/contacts')
       ]);
 
-      setBookings(bookingsResponse.data);
-      setContacts(contactsResponse.data);
-      console.log('Dashboard data loaded successfully');
+      setBookings(bookingsRes.data);
+      setContacts(contactsRes.data);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
-      handleApiError(error);
+      setAlertInfo({
+        message: error.response?.data?.message || 'Failed to load data',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -144,7 +116,10 @@ const AdminDashboard = () => {
       loadDashboardData();
     } catch (error) {
       console.error('Error confirming booking:', error);
-      handleApiError(error);
+      setAlertInfo({
+        message: error.response?.data?.message || 'Failed to confirm booking',
+        type: 'error'
+      });
     } finally {
       setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
     }
@@ -161,7 +136,10 @@ const AdminDashboard = () => {
       loadDashboardData();
     } catch (error) {
       console.error('Error rejecting booking:', error);
-      handleApiError(error);
+      setAlertInfo({
+        message: error.response?.data?.message || 'Failed to reject booking',
+        type: 'error'
+      });
     } finally {
       setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
     }
@@ -178,7 +156,10 @@ const AdminDashboard = () => {
       loadDashboardData();
     } catch (error) {
       console.error('Error marking booking as delivered:', error);
-      handleApiError(error);
+      setAlertInfo({
+        message: error.response?.data?.message || 'Failed to mark as delivered',
+        type: 'error'
+      });
     } finally {
       setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
     }

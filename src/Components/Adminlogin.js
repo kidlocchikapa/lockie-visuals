@@ -13,33 +13,9 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const validateToken = async () => {
-      const token = localStorage.getItem("adminToken");
-      if (!token) return;
-
-      try {
-        const response = await fetch(`${API_URL}/auth/validate`, {
-          method: "GET",
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': token,
-          },
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          navigate("/admin/dashboard");
-        } else {
-          localStorage.removeItem("adminToken");
-        }
-      } catch (error) {
-        console.error("Token validation error:", error);
-        localStorage.removeItem("adminToken");
-      }
-    };
-
-    validateToken();
-  }, [navigate]);
+    // Clear any existing token on component mount
+    localStorage.removeItem("adminToken");
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -67,18 +43,19 @@ const AdminLogin = () => {
       const data = await response.json();
 
       if (response.ok && data.access_token) {
-        // Ensure consistent Bearer prefix
-        const token = `Bearer ${data.access_token.replace('Bearer ', '')}`;
+        // Ensure token has Bearer prefix
+        const token = data.access_token.startsWith('Bearer ') 
+          ? data.access_token 
+          : `Bearer ${data.access_token}`;
         localStorage.setItem("adminToken", token);
-        console.log('Token stored:', token.substring(0, 20) + '...');
         setSuccess("Login successful!");
         navigate("/admin/dashboard");
       } else {
-        setError(data.message || "Invalid credentials. Please try again.");
+        throw new Error(data.message || "Invalid credentials");
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError("Network error. Please try again later.");
+      setError(error.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
