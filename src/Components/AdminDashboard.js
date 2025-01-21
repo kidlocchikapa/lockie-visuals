@@ -59,7 +59,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      await apiClient.get('/auth/validate');
+      await apiClient.get('/auth');
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Auth check failed:', error);
