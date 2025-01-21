@@ -70,7 +70,7 @@ const AdminDashboard = () => {
 
     try {
       // Using the /auth/user endpoint instead of /auth/verify
-      const response = await apiClient.get('/auth');
+      const response = await apiClient.get('/auth/users');
       if (response.data) {
         setIsAuthenticated(true);
       } else {
