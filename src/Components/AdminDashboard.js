@@ -56,7 +56,8 @@ const AdminDashboard = () => {
       setLoading(true);
       // Attempt to fetch data to confirm authentication
       const [bookingsRes, contactsRes] = await Promise.all([
-        apiClient.get('/admin/bookings')
+        apiClient.get('/admin/bookings'),
+        apiClient.get('/admin/contacts'),
       ]);
 
       setBookings(bookingsRes.data);
