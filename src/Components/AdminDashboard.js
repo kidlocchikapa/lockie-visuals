@@ -8,23 +8,31 @@ const API_URL = 'https://lockievisualbackend.onrender.com';
 const apiClient = axios.create({
   baseURL: API_URL,
   timeout: 10000,
-  withCredentials: true
+  withCredentials: true,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
 });
 
 // Add auth token to requests
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('adminToken');
   if (token) {
-    config.headers.Authorization = token; // No need to add Bearer prefix as it's already included
+    config.headers.Authorization = token;
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 // Handle response errors globally
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    console.error('API Error:', error.response?.status, error.response?.data);
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.log('Token expired or invalid - logging out');
       localStorage.removeItem('adminToken');
       window.location.href = '/admin/login';
     }
@@ -47,24 +55,23 @@ const AdminDashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('adminToken');
+      console.log('Checking auth with token:', token?.substring(0, 20) + '...');
+      
       if (!token) {
+        console.log('No token found, redirecting to login');
         navigate('/admin/login');
         return;
       }
 
       try {
-        const response = await fetch(`${API_URL}/auth/validate`, {
-          headers: {
-            Authorization: token
-          },
-          credentials: 'include'
-        });
+        const response = await apiClient.get('/auth/validate');
+        console.log('Auth validation response:', response.status);
 
-        if (response.ok) {
+        if (response.status === 200) {
+          console.log('Authentication successful');
           setIsAuthenticated(true);
         } else {
-          localStorage.removeItem('adminToken');
-          navigate('/admin/login');
+          throw new Error('Authentication failed');
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -76,59 +83,8 @@ const AdminDashboard = () => {
     checkAuth();
   }, [navigate]);
 
-  const adminApi = {
-    async getBookings() {
-      try {
-        const response = await apiClient.get('/admin/bookings');
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-        throw error;
-      }
-    },
-
-    async getContacts() {
-      try {
-        const response = await apiClient.get('/admin/contacts');
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-        throw error;
-      }
-    },
-
-    async confirmBooking(bookingId) {
-      try {
-        const response = await apiClient.post(`/admin/bookings/${bookingId}/confirm`);
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-        throw error;
-      }
-    },
-
-    async rejectBooking(bookingId) {
-      try {
-        const response = await apiClient.post(`/admin/bookings/${bookingId}/reject`);
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-        throw error;
-      }
-    },
-
-    async markDelivered(bookingId) {
-      try {
-        const response = await apiClient.post(`/admin/bookings/${bookingId}/deliver`);
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-        throw error;
-      }
-    }
-  };
-
   const handleApiError = (error) => {
+    console.error('API Error:', error);
     const errorMessage = error.response?.data?.message || 'An error occurred';
     setAlertInfo({
       message: errorMessage,
@@ -143,22 +99,28 @@ const AdminDashboard = () => {
   };
 
   const loadDashboardData = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      console.log('Not authenticated, skipping data load');
+      return;
+    }
 
     try {
+      console.log('Loading dashboard data...');
       setLoading(true);
       setAlertInfo({ message: '', type: '' });
       setIsRefreshing(true);
 
-      const [bookingsData, contactsData] = await Promise.all([
-        adminApi.getBookings(),
-        adminApi.getContacts()
+      const [bookingsResponse, contactsResponse] = await Promise.all([
+        apiClient.get('/admin/bookings'),
+        apiClient.get('/admin/contacts')
       ]);
 
-      setBookings(bookingsData);
-      setContacts(contactsData);
+      setBookings(bookingsResponse.data);
+      setContacts(contactsResponse.data);
+      console.log('Dashboard data loaded successfully');
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+      handleApiError(error);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -174,7 +136,7 @@ const AdminDashboard = () => {
   const handleConfirm = async (bookingId) => {
     try {
       setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
-      await adminApi.confirmBooking(bookingId);
+      await apiClient.post(`/admin/bookings/${bookingId}/confirm`);
       setAlertInfo({
         message: 'Booking confirmed successfully!',
         type: 'success'
@@ -182,6 +144,7 @@ const AdminDashboard = () => {
       loadDashboardData();
     } catch (error) {
       console.error('Error confirming booking:', error);
+      handleApiError(error);
     } finally {
       setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
     }
@@ -190,7 +153,7 @@ const AdminDashboard = () => {
   const handleReject = async (bookingId) => {
     try {
       setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
-      await adminApi.rejectBooking(bookingId);
+      await apiClient.post(`/admin/bookings/${bookingId}/reject`);
       setAlertInfo({
         message: 'Booking rejected successfully!',
         type: 'success'
@@ -198,6 +161,7 @@ const AdminDashboard = () => {
       loadDashboardData();
     } catch (error) {
       console.error('Error rejecting booking:', error);
+      handleApiError(error);
     } finally {
       setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
     }
@@ -206,7 +170,7 @@ const AdminDashboard = () => {
   const handleMarkDelivered = async (bookingId) => {
     try {
       setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
-      await adminApi.markDelivered(bookingId);
+      await apiClient.post(`/admin/bookings/${bookingId}/deliver`);
       setAlertInfo({
         message: 'Booking marked as delivered successfully!',
         type: 'success'
@@ -214,6 +178,7 @@ const AdminDashboard = () => {
       loadDashboardData();
     } catch (error) {
       console.error('Error marking booking as delivered:', error);
+      handleApiError(error);
     } finally {
       setActionLoading((prev) => ({ ...prev, [bookingId]: false }));
     }

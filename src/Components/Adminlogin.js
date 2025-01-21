@@ -1,7 +1,8 @@
+// AdminLogin.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "https://lockievisualbackend.onrender.com/auth";
+const API_URL = "https://lockievisualbackend.onrender.com";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -12,12 +13,16 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const validateToken = async (token) => {
+    const validateToken = async () => {
+      const token = localStorage.getItem("adminToken");
+      if (!token) return;
+
       try {
-        const response = await fetch(`${API_URL}/validate`, {
+        const response = await fetch(`${API_URL}/auth/validate`, {
           method: "GET",
           headers: {
-            Authorization: token,
+            'Accept': 'application/json',
+            'Authorization': token,
           },
           credentials: 'include'
         });
@@ -33,10 +38,7 @@ const AdminLogin = () => {
       }
     };
 
-    const token = localStorage.getItem("adminToken");
-    if (token) {
-      validateToken(token);
-    }
+    validateToken();
   }, [navigate]);
 
   const handleSubmit = async (event) => {
@@ -52,10 +54,11 @@ const AdminLogin = () => {
       setError("");
       setSuccess("");
 
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { 
-          "Content-Type": "application/json" 
+          'Accept': 'application/json',
+          'Content-Type': "application/json" 
         },
         credentials: 'include',
         body: JSON.stringify({ email, password }),
@@ -64,19 +67,18 @@ const AdminLogin = () => {
       const data = await response.json();
 
       if (response.ok && data.access_token) {
-        const token = data.access_token.startsWith("Bearer ") 
-          ? data.access_token 
-          : `Bearer ${data.access_token}`;
-
+        // Ensure consistent Bearer prefix
+        const token = `Bearer ${data.access_token.replace('Bearer ', '')}`;
         localStorage.setItem("adminToken", token);
+        console.log('Token stored:', token.substring(0, 20) + '...');
         setSuccess("Login successful!");
         navigate("/admin/dashboard");
       } else {
         setError(data.message || "Invalid credentials. Please try again.");
       }
     } catch (error) {
-      setError("Network error. Please try again later.");
       console.error("Login error:", error);
+      setError("Network error. Please try again later.");
     } finally {
       setIsLoading(false);
     }
