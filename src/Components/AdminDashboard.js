@@ -20,7 +20,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('adminToken');
   if (token) {
-    config.headers.Authorization = token;
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 }, (error) => {
@@ -30,7 +30,7 @@ apiClient.interceptors.request.use((config) => {
 // Add response interceptor
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
       localStorage.removeItem('adminToken');
       window.location.href = '/admin/login';
@@ -52,7 +52,6 @@ const AdminDashboard = () => {
 
   const checkAuth = useCallback(async () => {
     const token = localStorage.getItem('adminToken');
-    
     if (!token) {
       navigate('/admin/login');
       return;
@@ -180,7 +179,7 @@ const AdminDashboard = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h2 className="text-2xl font-semibold text-gray-700">Admin Dashboard</h2>
-      
+
       {alertInfo.message && (
         <div className={`px-4 py-3 rounded-lg mb-4 ${
           alertInfo.type === 'error' 
@@ -253,33 +252,27 @@ const AdminDashboard = () => {
                           {new Date(booking.date).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                          {booking.status === 'pending' && (
-                            <>
-                              <button
-                                onClick={() => handleConfirm(booking.id)}
-                                disabled={actionLoading[booking.id]}
-                                className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {actionLoading[booking.id] ? 'Confirming...' : 'Confirm'}
-                              </button>
-                              <button
-                                onClick={() => handleReject(booking.id)}
-                                disabled={actionLoading[booking.id]}
-                                className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {actionLoading[booking.id] ? 'Rejecting...' : 'Reject'}
-                              </button>
-                            </>
-                          )}
-                          {booking.status === 'confirmed' && !booking.delivered && (
-                            <button
-                              onClick={() => handleMarkDelivered(booking.id)}
-                              disabled={actionLoading[booking.id]}
-                              className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {actionLoading[booking.id] ? 'Marking...' : 'Mark Delivered'}
-                            </button>
-                          )}
+                          <button
+                            onClick={() => handleConfirm(booking.id)}
+                            className="text-green-600 hover:text-green-900"
+                            disabled={actionLoading[booking.id]}
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => handleReject(booking.id)}
+                            className="text-red-600 hover:text-red-900"
+                            disabled={actionLoading[booking.id]}
+                          >
+                            Reject
+                          </button>
+                          <button
+                            onClick={() => handleMarkDelivered(booking.id)}
+                            className="text-blue-600 hover:text-blue-900"
+                            disabled={actionLoading[booking.id]}
+                          >
+                            Mark Delivered
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -293,10 +286,10 @@ const AdminDashboard = () => {
 
       {activeTab === 'contacts' && (
         <div className="my-8">
-          <h3 className="text-xl font-medium text-gray-600 mb-4">Contact Messages</h3>
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Contacts</h3>
           <div className="bg-white shadow rounded-lg overflow-hidden">
             {contacts.length === 0 ? (
-              <p className="p-4 text-gray-500">No contact messages available.</p>
+              <p className="p-4 text-gray-500">No contacts available.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -314,14 +307,10 @@ const AdminDashboard = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{contact.name}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">{contact.email}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{contact.message}</div>
-                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contact.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contact.message}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(contact.createdAt).toLocaleDateString()}
+                          {new Date(contact.date).toLocaleDateString()}
                         </td>
                       </tr>
                     ))}
