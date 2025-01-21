@@ -63,7 +63,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const response = await apiClient.get('/auth/users');
+      const response = await apiClient.get('/auth/user');
       if (response.data) {
         setIsAuthenticated(true);
       } else {
