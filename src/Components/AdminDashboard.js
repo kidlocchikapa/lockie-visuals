@@ -3,7 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'https://lockievisualbackend.onrender.com/auth'; // Updated to match login components
+// Updated base URL to match the backend structure
+const API_URL = 'https://lockievisualbackend.onrender.com';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -39,6 +40,16 @@ apiClient.interceptors.response.use(
   }
 );
 
+const Alert = ({ message, type }) => (
+  <div className={`px-4 py-3 rounded-lg mb-4 ${
+    type === 'error' 
+      ? 'bg-red-100 text-red-800 border border-red-200' 
+      : 'bg-green-100 text-green-800 border border-green-200'
+  }`}>
+    <p className="text-sm">{message}</p>
+  </div>
+);
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('bookings');
@@ -50,16 +61,6 @@ const AdminDashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const Alert = ({ message, type }) => (
-    <div className={`px-4 py-3 rounded-lg mb-4 ${
-      type === 'error' 
-        ? 'bg-red-100 text-red-800 border border-red-200' 
-        : 'bg-green-100 text-green-800 border border-green-200'
-    }`}>
-      <p className="text-sm">{message}</p>
-    </div>
-  );
-
   const checkAuth = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -68,8 +69,13 @@ const AdminDashboard = () => {
     }
 
     try {
-      const response = await apiClient.get('/verify'); // Updated endpoint for auth verification
-      setIsAuthenticated(true);
+      // Using the /auth/user endpoint instead of /auth/verify
+      const response = await apiClient.get('/auth/user');
+      if (response.data) {
+        setIsAuthenticated(true);
+      } else {
+        throw new Error('Authentication failed');
+      }
     } catch (error) {
       console.error('Auth check failed:', error);
       localStorage.removeItem('token');
@@ -89,8 +95,9 @@ const AdminDashboard = () => {
       setAlertInfo({ message: '', type: '' });
       setIsRefreshing(true);
 
+      // Using the correct endpoints for admin routes
       const [bookingsRes, contactsRes] = await Promise.all([
-        apiClient.get('/admin/bookings'), // These endpoints remain the same as they're admin-specific
+        apiClient.get('/admin/bookings'),
         apiClient.get('/admin/contacts')
       ]);
 
@@ -102,6 +109,11 @@ const AdminDashboard = () => {
         message: error.response?.data?.message || 'Failed to load data',
         type: 'error'
       });
+      
+      // If we get a 401/403, the interceptor will handle the redirect
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        return;
+      }
     } finally {
       setLoading(false);
       setIsRefreshing(false);
