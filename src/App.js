@@ -66,7 +66,7 @@ const App = () => {
             <Route path="/admin/bookings/confirm/:id" element={<AdminDashboard />} />
             <Route path="/admin/bookings/reject/:id" element={<AdminDashboard />} />
             <Route path="/admin/bookings/deliver/:id" element={<AdminDashboard />} />
-            <Route path="/bookings" element={<ServiceBookingDashboard />} />
+            <Route path="/bookings/ :id" element={<ServiceBookingDashboard />} />
             {/* Group all maintenance routes */}
             {maintainanceRoutes.map(path => (
               <Route key={path} path={path} element={<Maintainance />} />
