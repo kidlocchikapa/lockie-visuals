@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './Components/Head';
 import EmailVerification from './Components/EmailVerification';
 import AdminLogin from './Components/Adminlogin';
@@ -45,6 +45,7 @@ const App = () => {
         <Navbar />
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={
               <Suspense fallback={<LoadingSpinner />}>
                 <HomePage />
@@ -54,23 +55,36 @@ const App = () => {
               </Suspense>
             } />
             <Route path="/services" element={<OurServices />} />
-            <Route path="/dashboard" element={<ServiceBookingDashboard />} />
             <Route path="/portfolio" element={<PortfolioSections />} />
             <Route path="/about" element={<AboutUs />} />
+            <Route path="/contact" element={<ContactUs />} />
+            
+            {/* Auth Routes */}
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/contact" element={<ContactUs />} />
             <Route path="/verify-email" element={<EmailVerification />} />
-            <Route path="/admin/bookings/confirm/:id" element={<AdminDashboard />} />
-            <Route path="/admin/bookings/reject/:id" element={<AdminDashboard />} />
-            <Route path="/admin/bookings/deliver/:id" element={<AdminDashboard />} />
+            
+            {/* User Dashboard Routes */}
+            <Route path="/dashboard" element={<ServiceBookingDashboard />} />
             <Route path="/bookings/:id" element={<ServiceBookingDashboard />} />
-            {/* Group all maintenance routes */}
+            
+            {/* Admin Routes */}
+            <Route path="/admin">
+              <Route path="login" element={<AdminLogin />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              {/* Remove these routes as they're handled by the API, not separate pages */}
+              {/* <Route path="bookings/confirm/:id" element={<AdminDashboard />} />
+              <Route path="bookings/reject/:id" element={<AdminDashboard />} />
+              <Route path="bookings/deliver/:id" element={<AdminDashboard />} /> */}
+            </Route>
+
+            {/* Maintenance Routes */}
             {maintainanceRoutes.map(path => (
               <Route key={path} path={path} element={<Maintainance />} />
             ))}
+
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       </div>
