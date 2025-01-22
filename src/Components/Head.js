@@ -6,15 +6,19 @@ import { Link } from 'react-router-dom';
 function Head() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  // Add state for user authentication (in a real app, this would come from your auth context/state management)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  
+  const handleMenuItemClick = () => {
+    setIsMenuOpen(false);
+    setIsDropdownOpen(false);
+  };
 
   const solutions = [
     'Graphic Designing',
-    'Website Designing',
+    'Mobile App Development',
     'Web Development',
     'Marketing',
   ];
@@ -35,7 +39,7 @@ function Head() {
                   onClick={toggleDropdown}
                   className="px-4 py-2 flex items-center hover:text-orange-500 transition-colors"
                 >
-                  Solutions <ChevronDown className="ml-1 h-4 w-4" />
+                  Solutions <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 <ul
                   className={`absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 shadow-lg z-50 rounded-lg transition-all duration-300 ease-in-out ${
@@ -48,6 +52,7 @@ function Head() {
                     <li key={index}>
                       <Link
                         to={`/${solution.toLowerCase().replace(/\s/g, '-')}`}
+                        onClick={handleMenuItemClick}
                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-orange-500 rounded-lg transition-colors"
                       >
                         {solution}
@@ -56,29 +61,28 @@ function Head() {
                   ))}
                 </ul>
               </li>
-              {/* Dashboard link - only shown when logged in */}
               {isLoggedIn && (
                 <li className="px-4 py-2 hover:text-orange-500 transition-colors">
-                  <Link to="/dashboard">Dashboard</Link>
+                  <Link to="/dashboard" onClick={handleMenuItemClick}>Dashboard</Link>
                 </li>
               )}
               <li className="px-4 py-2 hover:text-orange-500 transition-colors">
-                <Link to="/about">About Us</Link>
+                <Link to="/about" onClick={handleMenuItemClick}>About Us</Link>
               </li>
               <li className="px-4 py-2 hover:text-orange-500 transition-colors">
-                <Link to="/contact">Contact</Link>
+                <Link to="/contact" onClick={handleMenuItemClick}>Contact</Link>
               </li>
               {!isLoggedIn ? (
                 <>
                   <li>
-                    <Link to="/signup">
+                    <Link to="/signup" onClick={handleMenuItemClick}>
                       <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors">
                         Sign Up
                       </button>
                     </Link>
                   </li>
                   <li>
-                    <Link to="/login">
+                    <Link to="/login" onClick={handleMenuItemClick}>
                       <button className="px-4 py-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors">
                         Login
                       </button>
@@ -88,7 +92,10 @@ function Head() {
               ) : (
                 <li>
                   <button 
-                    onClick={() => setIsLoggedIn(false)}
+                    onClick={() => {
+                      setIsLoggedIn(false);
+                      handleMenuItemClick();
+                    }}
                     className="px-4 py-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
                   >
                     Logout
@@ -100,9 +107,9 @@ function Head() {
           <div className="md:hidden">
             <button onClick={toggleMenu}>
               {isMenuOpen ? (
-                <X className="h-6 w-6 text-gray-900" />
+                <X className="h-6 w-6 text-gray-900 transition-transform duration-300 rotate-90" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-900" />
+                <Menu className="h-6 w-6 text-gray-900 transition-transform duration-300" />
               )}
             </button>
           </div>
@@ -124,7 +131,7 @@ function Head() {
                 className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-gray-100 w-full text-left flex items-center justify-between transition-colors"
               >
                 Solutions
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className={`h-4 w-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-90' : ''}`} />
               </button>
               {isDropdownOpen && (
                 <ul className="pl-4 space-y-2">
@@ -132,6 +139,7 @@ function Head() {
                     <li key={index}>
                       <Link
                         to={`/${solution.toLowerCase().replace(/\s/g, '-')}`}
+                        onClick={handleMenuItemClick}
                         className="block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors"
                       >
                         {solution}
@@ -141,11 +149,11 @@ function Head() {
                 </ul>
               )}
             </li>
-            {/* Dashboard link in mobile menu - only shown when logged in */}
             {isLoggedIn && (
               <li>
                 <Link
                   to="/dashboard"
+                  onClick={handleMenuItemClick}
                   className="block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors"
                 >
                   Dashboard
@@ -155,6 +163,7 @@ function Head() {
             <li>
               <Link
                 to="/about"
+                onClick={handleMenuItemClick}
                 className="block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors"
               >
                 About Us
@@ -163,6 +172,7 @@ function Head() {
             <li>
               <Link
                 to="/contact"
+                onClick={handleMenuItemClick}
                 className="block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors"
               >
                 Contact
@@ -171,14 +181,14 @@ function Head() {
             {!isLoggedIn ? (
               <>
                 <li>
-                  <Link to="/signup">
+                  <Link to="/signup" onClick={handleMenuItemClick}>
                     <button className="w-full text-left block px-3 py-2 rounded-lg text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-colors">
                       Sign Up
                     </button>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/login">
+                  <Link to="/login" onClick={handleMenuItemClick}>
                     <button className="w-full text-left block px-3 py-2 rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors">
                       Login
                     </button>
@@ -188,7 +198,10 @@ function Head() {
             ) : (
               <li>
                 <button 
-                  onClick={() => setIsLoggedIn(false)}
+                  onClick={() => {
+                    setIsLoggedIn(false);
+                    handleMenuItemClick();
+                  }}
                   className="w-full text-left block px-3 py-2 rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors"
                 >
                   Logout
