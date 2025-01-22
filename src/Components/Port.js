@@ -23,7 +23,6 @@ import infinity from '../asserts/infinity-1.jpg';
 import joe from '../asserts/JOE.jpg';
 import madalo from '../asserts/madalo.jpg';
 import puli from '../asserts/pulli.jpg';
-import online from '../asserts/Online.jpg';
 import somase from '../asserts/SomaseP.jpg';
 import unt from '../asserts/Untitled-1.jpg';
 
@@ -51,7 +50,6 @@ const PortfolioSections = () => {
     { src: joe, alt: 'Joe' },
     { src: madalo, alt: 'Madalo' },
     { src: puli, alt: 'Puli' },
-    { src: online, alt: 'Online' },
     { src: somase, alt: 'Somase' },
     { src: unt, alt: 'Untitled' }
   ];

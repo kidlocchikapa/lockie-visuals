@@ -2,35 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Instagram, Facebook, MessageCircle, Video, Twitter, Mail } from 'lucide-react';
-import yusuf from './Yusuf.png';
 import LogoImage from '../asserts/LogoImage.png';
-import kidloc from './lockie.png';
+import Philimage from '../asserts/Philimage.png'
+import Danimage from '../asserts/DanImage.png'
 import Pasco from '../asserts/Pasco.png';
 
 const defaultTestimonials = [
   {
     id: 1,
     image: Pasco,
-    name: "Pasco",
+    name: "Yunusu Kadango",
     heading: "Exceptional Graphics",
-    text: "Thank you for the exceptional experience! Your artistic designs surpassed my expectations, Speaking for themselves with their impeccable quality. I felt warmly welcomed, genuinely understood and valued throughout our interaction. Kudos to you.",
-    company: "Student"
+    text: "Thank you for an amazing experience! Your artistic designs exceeded my expectations, showcasing impeccable quality and creativity. I truly felt warmly welcomed, genuinely understood, and valued throughout our interaction. Kudos to you for such outstanding work!",
+    company: "Student ..MUBAS"
   },
   {
     id: 2,
-    image: kidloc,
-    name: "kidloc chikapa",
-    heading: "Professional Service",
-    text: "The team at Lockie Visuals delivered outstanding results for our corporate event. Their professionalism and quality of work was impressive.",
-    company: "Tech Innovations Ltd"
+    image: Danimage,
+    name: "Daniel Kumwenda",
+    heading: "Outstanding Creativity",
+    text: "The design exceeded our expectations! It perfectly captures the essence of our business and has already started drawing attention to our brand. Thank you for your professionalism and creativity. Highly recommended!",
+    company: "DK suppliers"
   },
   {
     id: 3,
-    image: yusuf,
-    name: "Philemon Mwanganya",
-    heading: "Amazing Event Coverage",
-    text: "They captured every special moment of our wedding perfectly. The photos and videos are absolutely beautiful!",
-    company: "Happy Client"
+    image: Philimage,
+    name: "Philip Mwanganya",
+    heading: "Designs That Inspire",
+    text: "As a society focused on mathematical sciences education, we wanted designs that reflect our passion and professionalism. You delivered beyond our expectations, and your work has become an integral part of our branding.",
+    company: "SOMASE"
   }
 ];
 
