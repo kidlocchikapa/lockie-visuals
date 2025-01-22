@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'https://lockievisualbc.onrender.com'; // Updated URL
+const API_URL = 'https://lockievisualbackend.onrender.com'; // Updated URL
 
 const apiClient = axios.create({
   baseURL: API_URL,
