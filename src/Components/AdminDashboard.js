@@ -68,11 +68,10 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'No date provided';
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return 'Invalid Date';
-      }
+      if (isNaN(date.getTime())) return 'Invalid Date';
       return date.toLocaleString('en-US', {
         weekday: 'long',
         year: 'numeric',
@@ -94,18 +93,24 @@ const AdminDashboard = () => {
       setLoading(true);
       setAlertInfo({ message: '', type: '' });
 
-      const response = await apiClient.get('/bookings');
+      // Using the admin endpoint from the logs
+      const response = await apiClient.get('/admin/bookings');
       const formattedBookings = response.data.map(booking => ({
         ...booking,
-        formattedDate: formatDate(booking.date)
+        formattedDate: formatDate(booking.bookingDate || booking.date)
       }));
       
       // Sort bookings by date (most recent first)
-      formattedBookings.sort((a, b) => new Date(b.date) - new Date(a.date));
+      formattedBookings.sort((a, b) => 
+        new Date(b.bookingDate || b.date) - new Date(a.bookingDate || a.date)
+      );
       setBookings(formattedBookings);
     } catch (error) {
       console.error('Error loading bookings:', error);
-      setAlertInfo({ message: 'Failed to load bookings', type: 'error' });
+      setAlertInfo({ 
+        message: error.response?.data?.message || 'Failed to load bookings', 
+        type: 'error' 
+      });
     } finally {
       setLoading(false);
     }
@@ -115,28 +120,33 @@ const AdminDashboard = () => {
     setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
 
     try {
+      // Using PATCH instead of POST based on the logs
+      const method = 'PATCH';
       let endpoint;
       switch (actionType) {
         case 'confirm':
-          endpoint = `/admin/bookings/${bookingId}/confirm`;
+          endpoint = `/bookings/${bookingId}/confirm`;
           break;
         case 'reject':
-          endpoint = `/admin/bookings/${bookingId}/reject`;
+          endpoint = `/bookings/${bookingId}/cancel`; // Using cancel endpoint from logs
           break;
         case 'deliver':
-          endpoint = `/admin/bookings/${bookingId}/deliver`;
+          endpoint = `/bookings/${bookingId}/deliver`;
           break;
         default:
           throw new Error('Invalid action type');
       }
 
-      await apiClient.post(endpoint);
+      await apiClient({
+        method,
+        url: endpoint
+      });
       
       setAlertInfo({
         message: `Booking ${actionType}ed successfully!`,
         type: 'success',
       });
-      loadBookings();
+      await loadBookings(); // Reload the bookings after action
     } catch (error) {
       console.error(`Error during ${actionType}:`, error);
       setAlertInfo({
@@ -220,8 +230,12 @@ const AdminDashboard = () => {
                       <div className="text-sm font-medium text-gray-900">
                         {booking.clientName || booking.name || 'N/A'}
                       </div>
-                      <div className="text-sm text-gray-500">{booking.clientEmail || booking.email || 'N/A'}</div>
-                      <div className="text-sm text-gray-500">{booking.clientPhone || booking.phone || 'N/A'}</div>
+                      <div className="text-sm text-gray-500">
+                        {booking.clientEmail || booking.email || 'N/A'}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {booking.clientPhone || booking.phone || 'N/A'}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
@@ -243,7 +257,7 @@ const AdminDashboard = () => {
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           booking.status === 'confirmed'
                             ? 'bg-green-100 text-green-800'
-                            : booking.status === 'rejected'
+                            : booking.status === 'cancelled'
                             ? 'bg-red-100 text-red-800'
                             : booking.status === 'delivered'
                             ? 'bg-blue-100 text-blue-800'
