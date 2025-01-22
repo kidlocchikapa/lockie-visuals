@@ -30,7 +30,7 @@ const defaultTestimonials = [
     name: "Philip Mwanganya",
     heading: "Designs That Inspire",
     text: "As a society focused on mathematical sciences education, we wanted designs that reflect our passion and professionalism. You delivered beyond our expectations, and your work has become an integral part of our branding.",
-    company: "SOMASE"
+    company: "SOMASE vice president"
   }
 ];
 

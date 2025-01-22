@@ -16,13 +16,13 @@ const ServiceBookingDashboard = () => {
       id: 1,
       name: 'Graphic Design',
       description: 'Professional graphic design services for your brand',
-      price: 'MWK 75,000',
+      price: 'MWK 10,000',
     },
     {
       id: 2,
       name: 'Website Development',
       description: 'Custom website development solutions',
-      price: 'MWK 113,000',
+      price: 'MWK 120,000',
     },
   ];
 
