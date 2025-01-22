@@ -68,15 +68,23 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      return date.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
   };
 
   const loadBookings = useCallback(async () => {
@@ -87,10 +95,14 @@ const AdminDashboard = () => {
       setAlertInfo({ message: '', type: '' });
 
       const response = await apiClient.get('/bookings');
-      setBookings(response.data.map(booking => ({
+      const formattedBookings = response.data.map(booking => ({
         ...booking,
         formattedDate: formatDate(booking.date)
-      })));
+      }));
+      
+      // Sort bookings by date (most recent first)
+      formattedBookings.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setBookings(formattedBookings);
     } catch (error) {
       console.error('Error loading bookings:', error);
       setAlertInfo({ message: 'Failed to load bookings', type: 'error' });
@@ -103,7 +115,22 @@ const AdminDashboard = () => {
     setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
 
     try {
-      await apiClient.post(`/admin/bookings/${bookingId}/${actionType}`);
+      let endpoint;
+      switch (actionType) {
+        case 'confirm':
+          endpoint = `/admin/bookings/${bookingId}/confirm`;
+          break;
+        case 'reject':
+          endpoint = `/admin/bookings/${bookingId}/reject`;
+          break;
+        case 'deliver':
+          endpoint = `/admin/bookings/${bookingId}/deliver`;
+          break;
+        default:
+          throw new Error('Invalid action type');
+      }
+
+      await apiClient.post(endpoint);
       
       setAlertInfo({
         message: `Booking ${actionType}ed successfully!`,
@@ -148,6 +175,15 @@ const AdminDashboard = () => {
       )}
 
       <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="mb-4 p-4">
+          <button
+            onClick={loadBookings}
+            className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600"
+          >
+            Refresh Bookings
+          </button>
+        </div>
+
         {bookings.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <p className="text-lg">No bookings available at the moment.</p>
@@ -167,6 +203,9 @@ const AdminDashboard = () => {
                     Service Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Additional Info
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -176,13 +215,13 @@ const AdminDashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {bookings.map((booking) => (
-                  <tr key={booking.id}>
+                  <tr key={booking._id || booking.id}>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {booking.name}
+                        {booking.clientName || booking.name || 'N/A'}
                       </div>
-                      <div className="text-sm text-gray-500">{booking.email}</div>
-                      <div className="text-sm text-gray-500">{booking.phone}</div>
+                      <div className="text-sm text-gray-500">{booking.clientEmail || booking.email || 'N/A'}</div>
+                      <div className="text-sm text-gray-500">{booking.clientPhone || booking.phone || 'N/A'}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
@@ -191,7 +230,12 @@ const AdminDashboard = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
-                        {booking.serviceType}
+                        {booking.serviceType || booking.service || 'N/A'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-500">
+                        {booking.additionalInfo || booking.notes || 'No additional information'}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -201,7 +245,7 @@ const AdminDashboard = () => {
                             ? 'bg-green-100 text-green-800'
                             : booking.status === 'rejected'
                             ? 'bg-red-100 text-red-800'
-                            : booking.status === 'completed'
+                            : booking.status === 'delivered'
                             ? 'bg-blue-100 text-blue-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}
@@ -214,28 +258,28 @@ const AdminDashboard = () => {
                         {booking.status === 'pending' && (
                           <>
                             <button
-                              onClick={() => handleBookingAction(booking.id, 'confirm')}
-                              disabled={actionLoading[booking.id]}
+                              onClick={() => handleBookingAction(booking._id || booking.id, 'confirm')}
+                              disabled={actionLoading[booking._id || booking.id]}
                               className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50"
                             >
-                              {actionLoading[booking.id] ? 'Processing...' : 'Confirm'}
+                              {actionLoading[booking._id || booking.id] ? 'Processing...' : 'Confirm'}
                             </button>
                             <button
-                              onClick={() => handleBookingAction(booking.id, 'reject')}
-                              disabled={actionLoading[booking.id]}
+                              onClick={() => handleBookingAction(booking._id || booking.id, 'reject')}
+                              disabled={actionLoading[booking._id || booking.id]}
                               className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50"
                             >
-                              {actionLoading[booking.id] ? 'Processing...' : 'Reject'}
+                              {actionLoading[booking._id || booking.id] ? 'Processing...' : 'Reject'}
                             </button>
                           </>
                         )}
                         {booking.status === 'confirmed' && (
                           <button
-                            onClick={() => handleBookingAction(booking.id, 'complete')}
-                            disabled={actionLoading[booking.id]}
+                            onClick={() => handleBookingAction(booking._id || booking.id, 'deliver')}
+                            disabled={actionLoading[booking._id || booking.id]}
                             className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
                           >
-                            {actionLoading[booking.id] ? 'Processing...' : 'Mark Complete'}
+                            {actionLoading[booking._id || booking.id] ? 'Processing...' : 'Mark Delivered'}
                           </button>
                         )}
                       </div>
