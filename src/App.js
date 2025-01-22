@@ -70,8 +70,8 @@ const App = () => {
             
             {/* Admin Routes */}
             <Route path="/admin">
-              <Route path="login" element={<AdminLogin />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
               {/* Remove these routes as they're handled by the API, not separate pages */}
               {/* <Route path="bookings/confirm/:id" element={<AdminDashboard />} />
               <Route path="bookings/reject/:id" element={<AdminDashboard />} />

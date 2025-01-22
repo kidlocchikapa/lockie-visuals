@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'https://lockievisualbackend.onrender.com';
+const API_URL = 'https://lockievisualbc.onrender.com'; // Updated URL
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -93,14 +93,12 @@ const AdminDashboard = () => {
       setLoading(true);
       setAlertInfo({ message: '', type: '' });
 
-      // Using the admin endpoint from the logs
       const response = await apiClient.get('/admin/bookings');
       const formattedBookings = response.data.map(booking => ({
         ...booking,
         formattedDate: formatDate(booking.bookingDate || booking.date)
       }));
       
-      // Sort bookings by date (most recent first)
       formattedBookings.sort((a, b) => 
         new Date(b.bookingDate || b.date) - new Date(a.bookingDate || a.date)
       );
@@ -120,18 +118,19 @@ const AdminDashboard = () => {
     setActionLoading((prev) => ({ ...prev, [bookingId]: true }));
 
     try {
-      // Using PATCH instead of POST based on the logs
       const method = 'PATCH';
-      let endpoint;
+      let endpoint = `/admin/bookings/${bookingId}`; // Base endpoint
+
+      // Append the action type to the endpoint
       switch (actionType) {
         case 'confirm':
-          endpoint = `/bookings/${bookingId}/confirm`;
+          endpoint += '/confirm';
           break;
         case 'reject':
-          endpoint = `/bookings/${bookingId}/cancel`; // Using cancel endpoint from logs
+          endpoint += '/cancel';
           break;
         case 'deliver':
-          endpoint = `/bookings/${bookingId}/deliver`;
+          endpoint += '/deliver';
           break;
         default:
           throw new Error('Invalid action type');
@@ -146,7 +145,7 @@ const AdminDashboard = () => {
         message: `Booking ${actionType}ed successfully!`,
         type: 'success',
       });
-      await loadBookings(); // Reload the bookings after action
+      await loadBookings();
     } catch (error) {
       console.error(`Error during ${actionType}:`, error);
       setAlertInfo({
