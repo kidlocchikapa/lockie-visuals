@@ -14,7 +14,8 @@ const defaultTestimonials = [
     name: "Yunusu Kadango",
     heading: "Exceptional Graphics",
     text: "Thank you for an amazing experience! Your artistic designs exceeded my expectations, showcasing impeccable quality and creativity. I truly felt warmly welcomed, genuinely understood, and valued throughout our interaction. Kudos to you for such outstanding work!",
-    company: "Student ..MUBAS"
+    company: "Student ..MUBAS",
+    bgColor: "from-gray-800 to-gray-800"
   },
   {
     id: 2,
@@ -22,7 +23,8 @@ const defaultTestimonials = [
     name: "Daniel Kumwenda",
     heading: "Outstanding Creativity",
     text: "The design exceeded our expectations! It perfectly captures the essence of our business and has already started drawing attention to our brand. Thank you for your professionalism and creativity. Highly recommended!",
-    company: "DK suppliers"
+    company: "DK suppliers",
+    bgColor: "from-gray-800 to-gray-800"
   },
   {
     id: 3,
@@ -30,45 +32,62 @@ const defaultTestimonials = [
     name: "Philip Mwanganya",
     heading: "Designs That Inspire",
     text: "As a society focused on mathematical sciences education, we wanted designs that reflect our passion and professionalism. You delivered beyond our expectations, and your work has become an integral part of our branding.",
-    company: "SOMASE vice president"
+    company: "SOMASE vice president",
+    bgColor: "from-gray-800 to-gray-800"
   }
 ];
 
 const TestimonialCard = ({ testimonial, isActive }) => (
   <motion.div
-    initial={{ opacity: 0, scale: 0.8 }}
+    initial={{ opacity: 0, x: 100 }}
     animate={{
       opacity: isActive ? 1 : 0,
-      scale: isActive ? 1 : 0.8,
-      rotateY: isActive ? 0 : 180
+      x: isActive ? 0 : 100,
+      display: isActive ? 'block' : 'none'
     }}
     transition={{
-      duration: 0.8,
-      type: "spring",
-      stiffness: 100
+      duration: 0.5,
+      ease: "easeInOut"
     }}
-    className="absolute top-0 left-0 w-full"
-    style={{ display: isActive ? 'block' : 'none' }}
+    className="w-full h-full"
   >
-    <div className="rounded-2xl bg-white p-4 md:p-8 shadow-xl">
-      <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-6">
-        <motion.div
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-4 border-gray-200 shadow-lg mb-4 md:mb-0 flex-shrink-0"
-        >
-          <img src={testimonial.image} alt={testimonial.name} className="h-full w-full object-cover" />
-        </motion.div>
-        <div className="flex-1 text-center md:text-left">
-          <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-            {testimonial.heading}
-          </h3>
-          <p className="text-sm md:text-base text-gray-600 mb-4">{testimonial.text}</p>
-          <p className="text-gray-700 font-bold">{testimonial.name}</p>
-          <p className="text-sm text-gray-500">{testimonial.company}</p>
+    <div className="flex flex-col md:flex-row h-full">
+      {/* Left color gradient section */}
+      <div className={`w-full md:w-1/4 bg-gradient-to-br ${testimonial.bgColor} p-6 rounded-t-lg md:rounded-l-lg md:rounded-tr-none`}>
+        <div className="h-full flex items-center justify-center">
+          <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-4 border-white/30 shadow-lg">
+            <img src={testimonial.image} alt={testimonial.name} className="h-full w-full object-cover" />
+          </div>
+        </div>
+      </div>
+      
+      {/* Right content section */}
+      <div className="w-full md:w-3/4 bg-white p-8 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex flex-col justify-between">
+        <div className="mb-6">
+          <p className="text-xl md:text-2xl text-gray-700 italic mb-4">"{testimonial.text}"</p>
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-gray-800">{testimonial.name}</h3>
+          <p className="text-gray-600">{testimonial.company}</p>
         </div>
       </div>
     </div>
   </motion.div>
+);
+
+const TestimonialDots = ({ total, active, setActive }) => (
+  <div className="flex justify-center space-x-2 mt-6">
+    {Array.from({ length: total }).map((_, index) => (
+      <button
+        key={index}
+        onClick={() => setActive(index)}
+        className={`h-3 w-3 rounded-full transition-all duration-300 ${
+          active === index ? 'bg-orange-500 w-6' : 'bg-gray-300'
+        }`}
+        aria-label={`Go to testimonial ${index + 1}`}
+      />
+    ))}
+  </div>
 );
 
 const SocialIcon = ({ Icon, href, label }) => (
@@ -103,34 +122,42 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
+    }, 8000);
     return () => clearInterval(timer);
   }, [testimonials]);
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="bg-gray-25 py-8 md:py-16 mb-8">
+      <div className="bg-gray-50 py-16 md:py-24">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-8 md:mb-12 text-center"
+            className="mb-12 md:mb-16 text-center"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              What Our Clients Say
+              How clients use Lockie Visuals
             </h2>
             <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-300 mb-2" />
           </motion.div>
 
-          <div className="relative h-[400px] md:h-[300px] mb-8">
-            {testimonials.map((testimonial, index) => (
-              <TestimonialCard
-                key={testimonial.id}
-                testimonial={testimonial}
-                isActive={currentTestimonial === index}
-              />
-            ))}
+          <div className="max-w-5xl mx-auto">
+            <div className="relative h-[400px] md:h-[300px] mb-8 overflow-hidden rounded-lg shadow-xl">
+              {testimonials.map((testimonial, index) => (
+                <TestimonialCard
+                  key={testimonial.id}
+                  testimonial={testimonial}
+                  isActive={currentTestimonial === index}
+                />
+              ))}
+            </div>
+            
+            <TestimonialDots 
+              total={testimonials.length}
+              active={currentTestimonial}
+              setActive={setCurrentTestimonial}
+            />
           </div>
         </div>
       </div>

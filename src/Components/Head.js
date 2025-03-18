@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LogoImage from '../asserts/LogoImage.png';
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -7,6 +7,25 @@ function Head() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Add scroll event listener to detect when user is scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    // Clean up event listener on component unmount
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
@@ -20,16 +39,25 @@ function Head() {
     'Graphic Designing',
     'Mobile App Development',
     'Web Development',
-    'Marketing',
+    'Digital Marketing',
   ];
 
   return (
-    <nav className="bg-gray-100 text-gray-900 font-medium font-poppins relative px-4 sm:px-6 lg:px-8">
+    <nav 
+  className={`fixed w-full font-medium font-poppins z-40 px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out ${
+    isScrolled ? 'bg-white shadow-md' : 'bg-transparent'
+  }`}
+>
+
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 w-40">
             <Link to="/">
-              <img src={LogoImage} alt="LockieVisuals" />
+              <img 
+                src={LogoImage} 
+                alt="LockieVisuals" 
+                className=""  
+              />
             </Link>
           </div>
           <div className="hidden md:block">
@@ -37,7 +65,9 @@ function Head() {
               <li className="relative group">
                 <button
                   onClick={toggleDropdown}
-                  className="px-4 py-2 flex items-center hover:text-orange-500 transition-colors"
+                  className={`px-4 py-2 flex items-center hover:text-orange-500 transition-colors ${
+                    isScrolled ? 'text-gray-900' : 'text-white'
+                  }`}
                 >
                   Solutions <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -62,14 +92,20 @@ function Head() {
                 </ul>
               </li>
               {isLoggedIn && (
-                <li className="px-4 py-2 hover:text-orange-500 transition-colors">
+                <li className={`px-4 py-2 hover:text-orange-500 transition-colors ${
+                  isScrolled ? 'text-gray-900' : 'text-white'
+                }`}>
                   <Link to="/dashboard" onClick={handleMenuItemClick}>Dashboard</Link>
                 </li>
               )}
-              <li className="px-4 py-2 hover:text-orange-500 transition-colors">
+              <li className={`px-4 py-2 hover:text-orange-500 transition-colors ${
+                isScrolled ? 'text-gray-900' : 'text-white'
+              }`}>
                 <Link to="/about" onClick={handleMenuItemClick}>About Us</Link>
               </li>
-              <li className="px-4 py-2 hover:text-orange-500 transition-colors">
+              <li className={`px-4 py-2 hover:text-orange-500 transition-colors ${
+                isScrolled ? 'text-gray-900' : 'text-white'
+              }`}>
                 <Link to="/contact" onClick={handleMenuItemClick}>Contact</Link>
               </li>
               {!isLoggedIn ? (
@@ -105,18 +141,18 @@ function Head() {
             </ul>
           </div>
           <div className="md:hidden">
-            <button onClick={toggleMenu}>
+            <button onClick={toggleMenu} className={isScrolled ? 'text-gray-900' : 'text-white'}>
               {isMenuOpen ? (
-                <X className="h-6 w-6 text-gray-900 transition-transform duration-300 rotate-90" />
+                <X className="h-6 w-6 transition-transform duration-300 rotate-90" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-900 transition-transform duration-300" />
+                <Menu className="h-6 w-6 transition-transform duration-300" />
               )}
             </button>
           </div>
         </div>
       </div>
       <div
-        className={`fixed inset-y-0 right-0 z-40 w-64 bg-white transform ${
+        className={`fixed inset-y-0 right-0 z-50 w-64 bg-white transform ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         } transition-transform duration-300 ease-in-out shadow-lg`}
       >
