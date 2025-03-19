@@ -99,30 +99,54 @@ const TestimonialDots = ({ total, active, setActive }) => (
   </div>
 );
 
-// Removed animation from SocialIcon
+// Updated SocialIcon to match PayChangu style while keeping original color scheme
 const SocialIcon = ({ Icon, href, label }) => (
   <a
     href={href}
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 shadow-md text-gray-700 hover:text-gray-900 hover:shadow-lg transition-all duration-300"
+    className="text-gray-300 hover:text-white transition-colors duration-300"
   >
     <Icon size={20} />
   </a>
 );
 
 const FooterSection = ({ title, children }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    className="relative"
-  >
-    <h4 className="text-xl md:text-2xl font-bold text-gray-100 mb-4">{title}</h4>
+  <div className="mb-6">
+    <h4 className="text-lg font-medium text-white mb-4">{title}</h4>
     {children}
-  </motion.div>
+  </div>
 );
+
+// New component for footer links
+const FooterLink = ({ to, children, isExternal = false }) => {
+  if (isExternal) {
+    return (
+      <li className="mb-2">
+        <a 
+          href={to}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-300 hover:text-white transition-colors duration-300"
+        >
+          {children}
+        </a>
+      </li>
+    );
+  }
+  
+  return (
+    <li className="mb-2">
+      <Link 
+        to={to} 
+        className="text-gray-300 hover:text-white transition-colors duration-300"
+      >
+        {children}
+      </Link>
+    </li>
+  );
+};
 
 const Footer = ({ testimonials = defaultTestimonials }) => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -194,59 +218,77 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         </div>
       </div>
 
-      <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-10 md:py-16 mt-auto">
+      {/* Updated footer structure to match PayChangu style */}
+      <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-16">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-            <FooterSection>
-              <div className="flex flex-wrap gap-3 md:gap-4">
-                <SocialIcon Icon={Instagram} href="https://instagram.com/lockievisuals" label="Instagram" />
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+            {/* Solutions Column */}
+            <div className="col-span-1">
+              <FooterSection title="Solutions">
+                <ul className="space-y-0">
+                  <FooterLink to="/gateway">Graphics Design</FooterLink>
+                  <FooterLink to="/virtual-cards">Photography</FooterLink>
+                  <FooterLink to="/mobile-recharge">Video Editing</FooterLink>
+                  <FooterLink to="/payment-link">Logo Design</FooterLink>
+                </ul>
+              </FooterSection>
+            </div>
+
+            {/* Company Column */}
+            <div className="col-span-1">
+              <FooterSection title="Company">
+                <ul className="space-y-0">
+                  <FooterLink to="/about-us">About Us</FooterLink>
+                  <FooterLink to="/contact">Contact</FooterLink>
+                  <FooterLink to="/careers">Careers</FooterLink>
+                </ul>
+              </FooterSection>
+            </div>
+
+            {/* Media Column */}
+            <div className="col-span-1">
+              <FooterSection title="Media">
+                <ul className="space-y-0">
+                  <FooterLink to="/blogs">Blogs</FooterLink>
+                  <FooterLink to="/brand-assets">Brand Assets</FooterLink>
+                </ul>
+              </FooterSection>
+            </div>
+
+            {/* Contact Column */}
+            <div className="col-span-1">
+              <FooterSection title="Contact">
+                <ul className="space-y-0">
+                  <FooterLink to="/contact-sales">Contact Sales</FooterLink>
+                  <FooterLink to="/contact-support">Contact Support</FooterLink>
+                </ul>
+              </FooterSection>
+            </div>
+
+            {/* Developers Column */}
+            <div className="col-span-1">
+              <FooterSection title="Developers">
+                <ul className="space-y-0">
+                  <FooterLink to="/api-reference">API Reference</FooterLink>
+                  <FooterLink to="/sdk">SDK</FooterLink>
+                </ul>
+              </FooterSection>
+            </div>
+          </div>
+
+          {/* Lower footer section with copyright and social icons */}
+          <div className="mt-12 pt-8 border-t border-gray-700">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-sm text-gray-400 mb-4 md:mb-0">
+                &copy;2025 Lockie Visuals. Empowering Creativity to Thrive in the Digital Economy.
+              </p>
+              
+              <div className="flex space-x-6">
                 <SocialIcon Icon={Facebook} href="https://facebook.com/lockievisuals" label="Facebook" />
-                <SocialIcon Icon={MessageCircle} href="https://wa.me/265990155300" label="WhatsApp" />
-                <SocialIcon Icon={Video} href="https://tiktok.com/@lockievisuals" label="TikTok" />
-                <SocialIcon Icon={Mail} href="mailto:kidloc24chikapa@gmail.com" label="Email" />
+                <SocialIcon Icon={Twitter} href="https://twitter.com/lockievisuals" label="Twitter" />
+                <SocialIcon Icon={Instagram} href="https://instagram.com/lockievisuals" label="Instagram" />
               </div>
-            </FooterSection>
-
-            <FooterSection title="Quick Links">
-              <motion.ul className="space-y-3">
-                {['About Us', 'Events', 'News'].map((item) => (
-                  <motion.li
-                    key={item}
-                    whileHover={{ x: 5 }}
-                    className="transition-colors duration-300"
-                  >
-                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-gray-300">
-                      {item}
-                    </Link>
-                  </motion.li>
-                ))}
-              </motion.ul>
-            </FooterSection>
-
-            <FooterSection title="Services">
-              <motion.ul className="space-y-3">
-                {['Contact', 'Solutions', 'Login', 'signup'].map((item) => (
-                  <motion.li
-                    key={item}
-                    whileHover={{ x: 5 }}
-                    className="transition-colors duration-300"
-                  >
-                    <Link to={`/${item.toLowerCase().replace(' ', '-')}`} className="hover:text-gray-300">
-                      {item}
-                    </Link>
-                  </motion.li>
-                ))}
-              </motion.ul>
-            </FooterSection>
-
-            <FooterSection title="Contact Info">
-              <motion.div className="space-y-3 text-sm md:text-base">
-                <p>Zomba, UNIMA - Malawi</p>
-                <p>contacts : +265 (0) 990 155 300</p>
-                <p>+265 (0) 888 777 332</p>
-                <p>Email: <a href="mailto:Infoatlockievisuals@gmail.com" className="underline hover:text-orange-300 transition-colors">Infoatlockievisuals@gmail.com</a></p>
-              </motion.div>
-            </FooterSection>
+            </div>
           </div>
         </div>
       </footer>
