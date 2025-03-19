@@ -55,7 +55,7 @@ const TestimonialCard = ({ testimonial, isActive }) => (
       {/* Left color gradient section */}
       <div className={`w-full md:w-1/4 bg-gradient-to-br ${testimonial.bgColor} p-6 rounded-t-lg md:rounded-l-lg md:rounded-tr-none`}>
         <div className="h-full flex items-center justify-center">
-          <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-4 border-white/30 shadow-lg">
+          <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden">
             <img src={testimonial.image} alt={testimonial.name} className="h-full w-full object-cover" />
           </div>
         </div>
