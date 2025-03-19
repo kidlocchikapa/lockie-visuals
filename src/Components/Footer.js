@@ -69,11 +69,11 @@ const TestimonialCard = ({ testimonial, isActive }) => (
         </div>
       </div>
       
-      {/* Right content section */}
+      {/* Right content section - Improved text visibility */}
       <div className="w-full md:w-2/3 bg-white p-6 md:p-8 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex flex-col justify-between">
         <div className="mb-4 md:mb-6">
           <h4 className="text-lg md:text-xl font-semibold text-orange-500 mb-2">{testimonial.heading}</h4>
-          <p className="text-base md:text-lg lg:text-xl text-gray-700 italic mb-4">"{testimonial.text}"</p>
+          <p className="text-sm md:text-base lg:text-lg text-gray-800 font-medium italic mb-4 leading-relaxed">"{testimonial.text}"</p>
         </div>
         <div>
           <h3 className="text-lg md:text-xl font-bold text-gray-800">{testimonial.name}</h3>
@@ -99,18 +99,17 @@ const TestimonialDots = ({ total, active, setActive }) => (
   </div>
 );
 
+// Removed animation from SocialIcon
 const SocialIcon = ({ Icon, href, label }) => (
-  <motion.a
+  <a
     href={href}
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    whileHover={{ scale: 1.2, rotate: 360 }}
-    whileTap={{ scale: 0.9 }}
     className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 shadow-md text-gray-700 hover:text-gray-900 hover:shadow-lg transition-all duration-300"
   >
     <Icon size={20} />
-  </motion.a>
+  </a>
 );
 
 const FooterSection = ({ title, children }) => (
@@ -141,12 +140,12 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
     }
   }, []);
 
-  // Dynamic height based on screen size
+  // Dynamic height based on screen size - Adjusted for better text display
   const getTestimonialHeight = () => {
-    if (windowWidth < 640) return "500px";
-    if (windowWidth < 768) return "450px";
-    if (windowWidth < 1024) return "350px";
-    return "320px";
+    if (windowWidth < 640) return "550px";
+    if (windowWidth < 768) return "480px";
+    if (windowWidth < 1024) return "380px";
+    return "340px";
   };
 
   useEffect(() => {
@@ -251,7 +250,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                 <p>Zomba, UNIMA - Malawi</p>
                 <p>contacts : +265 (0) 990 155 300</p>
                 <p>+265 (0) 888 777 332</p>
-                <p>Email : Infoatlockievisuals@gmail.com</p>
+                <p>Email: <a href="mailto:Infoatlockievisuals@gmail.com" className="underline hover:text-orange-300 transition-colors">Infoatlockievisuals@gmail.com</a></p>
               </motion.div>
             </FooterSection>
           </div>
