@@ -226,9 +226,9 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             <div className="col-span-1">
               <FooterSection title="Solutions">
                 <ul className="space-y-0">
-                  <FooterLink to="/gateway">Graphics Design</FooterLink>
+                  <FooterLink to="/gateway">Graphics Designing</FooterLink>
                   <FooterLink to="/virtual-cards">Mobileapp Development</FooterLink>
-                  <FooterLink to="/mobile-recharge">Web development</FooterLink>
+                  <FooterLink to="/mobile-recharge">Website development</FooterLink>
                   <FooterLink to="/payment-link">Digital Marketing</FooterLink>
                 </ul>
               </FooterSection>
@@ -240,7 +240,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                 <ul className="space-y-0">
                   <FooterLink to="/about-us">About Us</FooterLink>
                   <FooterLink to="/contact">Contact</FooterLink>
-                  <FooterLink to="/careers">Careers</FooterLink>
+                
                 </ul>
               </FooterSection>
             </div>
