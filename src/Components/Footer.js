@@ -198,12 +198,6 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             <FooterSection>
-              <motion.img
-                src={LogoImage}
-                alt="Lockie Visuals Logo"
-                className="h-12 w-auto mb-6 filter brightness-0 invert"
-                whileHover={{ scale: 1.05 }}
-              />
               <div className="flex flex-wrap gap-3 md:gap-4">
                 <SocialIcon Icon={Instagram} href="https://instagram.com/lockievisuals" label="Instagram" />
                 <SocialIcon Icon={Facebook} href="https://facebook.com/lockievisuals" label="Facebook" />
