@@ -158,7 +158,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="bg-gray-50 py-12 md:py-16 lg:py-24">
+      <div className="bg-white py-12 md:py-16 lg:py-24">
         <div className="container mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -167,7 +167,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             className="mb-10 md:mb-16 text-center"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              What client says about Lockie Visuals
+              What clients say about Lockie Visuals
             </h2>
             <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-300 mb-2" />
           </motion.div>
