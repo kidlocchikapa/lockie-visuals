@@ -52,22 +52,31 @@ const TestimonialCard = ({ testimonial, isActive }) => (
     className="w-full h-full"
   >
     <div className="flex flex-col md:flex-row h-full">
-      {/* Left color gradient section */}
-      <div className={`w-full md:w-1/4 bg-gradient-to-br ${testimonial.bgColor} p-6 rounded-t-lg md:rounded-l-lg md:rounded-tr-none`}>
+      {/* Left color gradient section - Enlarged image container */}
+      <div className={`w-full md:w-1/3 bg-gradient-to-br ${testimonial.bgColor} p-4 md:p-8 rounded-t-lg md:rounded-l-lg md:rounded-tr-none`}>
         <div className="h-full flex items-center justify-center">
-          <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden">
-            <img src={testimonial.image} alt={testimonial.name} className="h-full w-full object-cover" />
+          <div className="relative h-40 w-40 md:h-48 md:w-48 lg:h-56 lg:w-56 overflow-hidden rounded-full border-4 border-white shadow-lg">
+            <img 
+              src={testimonial.image} 
+              alt={testimonial.name} 
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://via.placeholder.com/200';
+              }}
+            />
           </div>
         </div>
       </div>
       
       {/* Right content section */}
-      <div className="w-full md:w-3/4 bg-white p-8 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex flex-col justify-between">
-        <div className="mb-6">
-          <p className="text-xl md:text-2xl text-gray-700 italic mb-4">"{testimonial.text}"</p>
+      <div className="w-full md:w-2/3 bg-white p-6 md:p-8 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex flex-col justify-between">
+        <div className="mb-4 md:mb-6">
+          <h4 className="text-lg md:text-xl font-semibold text-orange-500 mb-2">{testimonial.heading}</h4>
+          <p className="text-base md:text-lg lg:text-xl text-gray-700 italic mb-4">"{testimonial.text}"</p>
         </div>
         <div>
-          <h3 className="text-xl font-bold text-gray-800">{testimonial.name}</h3>
+          <h3 className="text-lg md:text-xl font-bold text-gray-800">{testimonial.name}</h3>
           <p className="text-gray-600">{testimonial.company}</p>
         </div>
       </div>
@@ -118,6 +127,27 @@ const FooterSection = ({ title, children }) => (
 
 const Footer = ({ testimonials = defaultTestimonials }) => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, []);
+
+  // Dynamic height based on screen size
+  const getTestimonialHeight = () => {
+    if (windowWidth < 640) return "500px";
+    if (windowWidth < 768) return "450px";
+    if (windowWidth < 1024) return "350px";
+    return "320px";
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -128,22 +158,25 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="bg-gray-50 py-16 md:py-24">
-        <div className="container mx-auto px-4">
+      <div className="bg-gray-50 py-12 md:py-16 lg:py-24">
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-12 md:mb-16 text-center"
+            className="mb-10 md:mb-16 text-center"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              How clients use Lockie Visuals
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+              What client says about Lockie Visuals
             </h2>
             <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-orange-500 to-orange-300 mb-2" />
           </motion.div>
 
           <div className="max-w-5xl mx-auto">
-            <div className="relative h-[400px] md:h-[300px] mb-8 overflow-hidden rounded-lg shadow-xl">
+            <div 
+              className="relative mb-8 overflow-hidden rounded-lg shadow-xl" 
+              style={{ height: getTestimonialHeight() }}
+            >
               {testimonials.map((testimonial, index) => (
                 <TestimonialCard
                   key={testimonial.id}
@@ -162,9 +195,9 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
         </div>
       </div>
 
-      <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-12 md:py-16 mt-auto">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+      <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-10 md:py-16 mt-auto">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             <FooterSection>
               <motion.img
                 src={LogoImage}
@@ -172,7 +205,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
                 className="h-12 w-auto mb-6 filter brightness-0 invert"
                 whileHover={{ scale: 1.05 }}
               />
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 md:gap-4">
                 <SocialIcon Icon={Instagram} href="https://instagram.com/lockievisuals" label="Instagram" />
                 <SocialIcon Icon={Facebook} href="https://facebook.com/lockievisuals" label="Facebook" />
                 <SocialIcon Icon={MessageCircle} href="https://wa.me/265990155300" label="WhatsApp" />
