@@ -227,9 +227,9 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
               <FooterSection title="Solutions">
                 <ul className="space-y-0">
                   <FooterLink to="/gateway">Graphics Design</FooterLink>
-                  <FooterLink to="/virtual-cards">Photography</FooterLink>
-                  <FooterLink to="/mobile-recharge">Video Editing</FooterLink>
-                  <FooterLink to="/payment-link">Logo Design</FooterLink>
+                  <FooterLink to="/virtual-cards">Mobileapp Development</FooterLink>
+                  <FooterLink to="/mobile-recharge">Web development</FooterLink>
+                  <FooterLink to="/payment-link">Digital Marketing</FooterLink>
                 </ul>
               </FooterSection>
             </div>
@@ -267,10 +267,9 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
 
             {/* Developers Column */}
             <div className="col-span-1">
-              <FooterSection title="Developers">
+              <FooterSection title="Projects">
                 <ul className="space-y-0">
-                  <FooterLink to="/api-reference">API Reference</FooterLink>
-                  <FooterLink to="/sdk">SDK</FooterLink>
+                  <FooterLink to="/api-reference">Project Enquiry</FooterLink>
                 </ul>
               </FooterSection>
             </div>
@@ -280,7 +279,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
           <div className="mt-12 pt-8 border-t border-gray-700">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-sm text-gray-400 mb-4 md:mb-0">
-                &copy;2025 Lockie Visuals. Empowering Creativity to Thrive in the Digital Economy.
+                &copy;2025 Lockie Visuals. Elevate Your Digital Identity, Empower Your Brand.
               </p>
               
               <div className="flex space-x-6">
