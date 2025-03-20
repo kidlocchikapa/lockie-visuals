@@ -226,10 +226,10 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             <div className="col-span-1">
               <FooterSection title="Solutions">
                 <ul className="space-y-0">
-                  <FooterLink to="/gateway">Graphics Designing</FooterLink>
-                  <FooterLink to="/virtual-cards">Mobileapp Development</FooterLink>
-                  <FooterLink to="/mobile-recharge">Website development</FooterLink>
-                  <FooterLink to="/payment-link">Digital Marketing</FooterLink>
+                  <FooterLink to="/graphic-designing">Graphics Designing</FooterLink>
+                  <FooterLink to="/mobileapp development-development">Mobileapp Development</FooterLink>
+                  <FooterLink to="/web-development">Website development</FooterLink>
+                  <FooterLink to="/Marketing">Digital Marketing</FooterLink>
                 </ul>
               </FooterSection>
             </div>
@@ -238,7 +238,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             <div className="col-span-1">
               <FooterSection title="Company">
                 <ul className="space-y-0">
-                  <FooterLink to="/about-us">About Us</FooterLink>
+                  <FooterLink to="/about">About Us</FooterLink>
                   <FooterLink to="/contact">Contact</FooterLink>
                 
                 </ul>
@@ -259,8 +259,8 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             <div className="col-span-1">
               <FooterSection title="Contact">
                 <ul className="space-y-0">
-                  <FooterLink to="/contact-sales">Contact Sales</FooterLink>
-                  <FooterLink to="/contact-support">Contact Support</FooterLink>
+                  <FooterLink to="/contact">Contact Sales</FooterLink>
+                  <FooterLink to="/contact">Contact Support</FooterLink>
                 </ul>
               </FooterSection>
             </div>
@@ -269,7 +269,7 @@ const Footer = ({ testimonials = defaultTestimonials }) => {
             <div className="col-span-1">
               <FooterSection title="Projects">
                 <ul className="space-y-0">
-                  <FooterLink to="/api-reference">Project Enquiry</FooterLink>
+                  <FooterLink to="/contact">Project Enquiry</FooterLink>
                 </ul>
               </FooterSection>
             </div>

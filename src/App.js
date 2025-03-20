@@ -32,6 +32,7 @@ const maintainanceRoutes = [
   '/graphic-designing',
   '/website-designing',
   '/see-more',
+  '/mobileapp development-development',
   '/discover',
   '/events',
   '/news',
@@ -63,6 +64,8 @@ const App = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/verify-email" element={<EmailVerification />} />
+            <Route path="/blogs" element={<Maintainance />} />
+            <Route path="/brand-assets" element={<Maintainance />} />
             
             {/* User Dashboard Routes */}
             <Route path="/dashboard" element={<ServiceBookingDashboard />} />
