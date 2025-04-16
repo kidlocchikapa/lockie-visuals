@@ -1,3 +1,4 @@
+// EmailVerification.jsx
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
@@ -10,8 +11,12 @@ const EmailVerification = () => {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        const response = await fetch(`https://lockievisualbackend.onrender.com/auth/verify-email?token=${token}`);
+        const response = await fetch(
+          `https://lockievisualbackend.onrender.com/auth/verify-email?token=${token}`
+        );
+
         const data = await response.json();
+        console.log('Verification response:', data);
 
         if (response.ok) {
           setStatus('success');
@@ -22,6 +27,7 @@ const EmailVerification = () => {
           setStatus('error');
         }
       } catch (error) {
+        console.error('Verification error:', error);
         setStatus('error');
       }
     };
@@ -34,12 +40,12 @@ const EmailVerification = () => {
   }, [token, navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+    <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center py-12 px-4">
+      <div className="max-w-md w-full space-y-8">
+        <div className="bg-white py-8 px-6 shadow rounded-lg text-center">
           {status === 'verifying' && (
-            <div className="text-center">
-              <h2 className="text-2xl font-bold mb-4">Verifying your email...</h2>
+            <>
+              <h2 className="text-xl font-semibold mb-4">Verifying your email...</h2>
               <div className="flex justify-center">
                 <svg
                   className="animate-spin h-8 w-8 text-orange-500"
@@ -54,31 +60,31 @@ const EmailVerification = () => {
                     r="10"
                     stroke="currentColor"
                     strokeWidth="4"
-                  ></circle>
+                  />
                   <path
                     className="opacity-75"
                     fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  ></path>
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  />
                 </svg>
               </div>
-            </div>
+            </>
           )}
 
           {status === 'success' && (
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-green-600 mb-4">✅ Email Verified!</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-green-600 mb-4">Email Verified!</h2>
               <p>Your email has been verified successfully. Redirecting to login...</p>
             </div>
           )}
 
           {status === 'error' && (
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-red-600 mb-4">❌ Verification Failed</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-red-600 mb-4">Verification Failed</h2>
               <p className="mb-4">The verification link is invalid or has expired.</p>
               <button
                 onClick={() => navigate('/login')}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600"
               >
                 Go to Login
               </button>
