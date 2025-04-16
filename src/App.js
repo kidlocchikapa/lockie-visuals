@@ -63,7 +63,8 @@ const App = () => {
             {/* Auth Routes */}
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/verify-email" element={<EmailVerification />} />
+            <Route path="/auth/verify-email" element={<EmailVerification />} />
+
             <Route path="/blogs" element={<Maintainance />} />
             <Route path="/brand-assets" element={<Maintainance />} />
             
